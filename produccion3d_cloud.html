@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Producción 3D</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#F7F7F5}
+body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1A1A1A;font-size:15px;max-width:480px;margin:0 auto;background:#F7F7F5}
+
+/* LOGIN */
+#login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 24px;text-align:center}
+.login-logo{font-size:48px;margin-bottom:16px}
+.login-title{font-size:22px;font-weight:700;letter-spacing:-.02em;margin-bottom:6px}
+.login-sub{font-size:14px;color:#888;margin-bottom:32px;line-height:1.5}
+.login-btn{display:inline-flex;align-items:center;gap:10px;padding:13px 22px;border:1.5px solid #D0D0CC;border-radius:12px;font-size:15px;cursor:pointer;background:#fff;color:#1A1A1A;font-family:inherit;font-weight:500;box-shadow:0 2px 8px rgba(0,0,0,.08);transition:all .15s;width:100%;justify-content:center;max-width:300px}
+.login-btn:active{background:#F3F3F0}
+.login-btn img{width:20px;height:20px}
+.sync-bar{display:flex;align-items:center;gap:6px;padding:7px 14px;background:#fff;border-bottom:1px solid #E8E8E4;font-size:12px;color:#888}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:#2ECC71;flex-shrink:0}
+.sync-dot.off{background:#CCCCCC}
+.sync-dot.syncing{background:#F39C12;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.user-info{margin-left:auto;display:flex;align-items:center;gap:6px;cursor:pointer}
+.user-avatar{width:22px;height:22px;border-radius:50%;border:1px solid #E0E0DC}
+
+/* APP */
+#app{display:none}
+.tabs{display:flex;border-bottom:1px solid #E0E0DC;position:sticky;top:0;background:#F7F7F5;z-index:10;padding-top:8px}
+.tab{flex:1;padding:8px 4px;text-align:center;font-size:12px;cursor:pointer;color:#888;border-bottom:2px solid transparent;transition:all .15s;letter-spacing:.01em}
+.tab.on{color:#1A1A1A;border-color:#1A1A1A;font-weight:600}
+.view{display:none;padding:14px 14px 80px}
+.view.on{display:block}
+.card{background:#fff;border:1px solid #E8E8E4;border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border:1px solid #D0D0CC;border-radius:9px;font-size:13px;cursor:pointer;background:transparent;color:#1A1A1A;font-family:inherit;-webkit-appearance:none;transition:background .12s}
+.btn:active{background:#EBEBEB}
+.btn-block{width:100%;justify-content:center;margin-bottom:12px}
+.btn-primary{background:#1A1A1A;color:#fff;border-color:#1A1A1A}
+.btn-primary:active{background:#333}
+.btn-sm{padding:6px 11px;font-size:12px}
+.btn-del{color:#C0392B;border-color:#F5AEAE;font-size:12px;padding:6px 11px}
+.badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.bp{background:#FEF3E2;color:#7A4500}
+.bx{background:#E8F0FC;color:#1A4D9A}
+.bd{background:#E6F4E1;color:#2A6B1A}
+.pbar{height:5px;background:#EBEBEB;border-radius:3px;margin:8px 0 4px;overflow:hidden}
+.pfill{height:100%;background:#2ECC71;border-radius:3px;transition:width .3s}
+.row{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid #F0F0EC}
+.row:last-child{border-bottom:none}
+.chk{width:23px;height:23px;min-width:23px;border-radius:6px;border:1.5px solid #CCCCCC;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all .15s;background:#fff}
+.chk.on{background:#2ECC71;border-color:#2ECC71;color:#fff}
+.pname{font-size:14px;font-weight:500}
+.pname.done{text-decoration:line-through;color:#AAAAAA}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.tag{font-size:11px;padding:2px 8px;border-radius:20px;background:#F3F3F0;color:#666;border:1px solid #E8E8E4}
+.sec{font-size:10px;font-weight:700;color:#999;letter-spacing:.08em;text-transform:uppercase;margin:16px 0 7px}
+.fi{display:block;width:100%;padding:9px 11px;border:1px solid #D8D8D4;border-radius:8px;font-family:inherit;font-size:14px;background:#fff;color:#1A1A1A;-webkit-appearance:none;margin-bottom:0;outline:none;transition:border-color .15s}
+.fi:focus{border-color:#1A1A1A}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.stat{background:#fff;border:1px solid #E8E8E4;border-radius:10px;padding:12px 14px}
+.stat-l{font-size:11px;color:#999;margin-bottom:4px;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
+.stat-v{font-size:24px;font-weight:700}
+.filter-row{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;-ms-overflow-style:none;scrollbar-width:none}
+.filter-row::-webkit-scrollbar{display:none}
+.fbtn{flex-shrink:0;padding:5px 13px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid #D8D8D4;background:#fff;color:#666;font-family:inherit}
+.fbtn.on{background:#1A1A1A;color:#fff;border-color:#1A1A1A}
+.empty{text-align:center;padding:48px 16px;color:#AAA;font-size:14px}
+.toggle-check{display:flex;align-items:center;gap:7px;cursor:pointer;user-select:none}
+.toggle-check .box{width:19px;height:19px;min-width:19px;border-radius:5px;border:1.5px solid #CCCCCC;display:flex;align-items:center;justify-content:center;transition:all .15s;background:#fff}
+.toggle-check .box.on{background:#2ECC71;border-color:#2ECC71;color:#fff}
+.toggle-check span{font-size:13px;color:#555}
+.piece-dest{display:flex;gap:16px;margin-top:8px}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:50;display:flex;align-items:flex-end}
+.sheet{background:#F7F7F5;border-radius:18px 18px 0 0;padding:18px 16px 32px;width:100%;max-height:92vh;overflow-y:auto}
+.prod-block{border:1px solid #E0E0DC;border-radius:10px;padding:12px;margin-bottom:8px;background:#fff}
+.cat-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #F0F0EC}
+.cat-row:last-child{border-bottom:none}
+.sort-bar{display:flex;gap:7px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px}
+.sbtn{padding:6px 12px;border-radius:8px;font-size:12px;cursor:pointer;border:1px solid #D8D8D4;background:#fff;color:#666;font-family:inherit;white-space:nowrap}
+.sbtn.on{background:#1A1A1A;color:#fff;border-color:#1A1A1A;font-weight:500}
+.group-label{font-size:11px;font-weight:700;color:#999;letter-spacing:.06em;text-transform:uppercase;margin:16px 0 5px;padding-bottom:5px;border-bottom:1px solid #EBEBEB}
+.order-actions{margin-top:12px;display:flex;justify-content:flex-end}
+.header-bar{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px}
+.order-name{font-weight:700;font-size:15px;letter-spacing:-.01em}
+.order-sub{font-size:13px;color:#888;margin-top:2px}
+.order-num{font-size:11px;color:#AAA;font-weight:400}
+.prod-title{font-size:13px;font-weight:600;color:#888;margin-bottom:5px}
+
+/* CONFIG SCREEN */
+#config-screen{display:none;padding:24px 20px 60px}
+.config-title{font-size:20px;font-weight:700;margin-bottom:4px;letter-spacing:-.02em}
+.config-sub{font-size:13px;color:#888;margin-bottom:24px;line-height:1.5}
+.config-step{background:#fff;border:1px solid #E8E8E4;border-radius:12px;padding:16px;margin-bottom:12px}
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#1A1A1A;color:#fff;font-size:11px;font-weight:700;margin-right:8px;flex-shrink:0}
+.step-title{font-weight:600;font-size:14px;display:flex;align-items:center;margin-bottom:8px}
+.step-body{font-size:13px;color:#555;line-height:1.6}
+.step-body code{background:#F3F3F0;padding:1px 6px;border-radius:4px;font-family:monospace;font-size:12px;color:#1A1A1A}
+.step-body a{color:#1A1A1A;font-weight:600}
+.field-note{font-size:12px;color:#AAA;margin-top:4px}
+</style>
+</head>
+<body>
+
+<!-- PANTALLA DE LOGIN -->
+<div id="login-screen">
+  <div class="login-logo">📦</div>
+  <div class="login-title">Producción 3D</div>
+  <div class="login-sub">Ingresá con tu cuenta Google para sincronizar tus pedidos en todos tus dispositivos.</div>
+  <button class="login-btn" onclick="loginGoogle()">
+    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+    Continuar con Google
+  </button>
+  <div id="login-error" style="margin-top:16px;font-size:13px;color:#C0392B;display:none"></div>
+  <button style="margin-top:24px;background:none;border:none;font-size:12px;color:#BBB;cursor:pointer;text-decoration:underline" onclick="showConfig()">
+    ¿Primera vez? Configurar Firebase
+  </button>
+</div>
+
+<!-- PANTALLA DE CONFIGURACIÓN -->
+<div id="config-screen">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px">
+    <button class="btn btn-sm" onclick="hideConfig()"><i class="ti ti-arrow-left"></i></button>
+    <span style="font-weight:700;font-size:16px">Configurar Firebase</span>
+  </div>
+
+  <div class="config-step">
+    <div class="step-title"><span class="step-num">1</span> Crear proyecto en Firebase</div>
+    <div class="step-body">
+      Entrá a <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> con tu cuenta Google y creá un proyecto nuevo. Podés llamarlo <code>produccion-3d</code>.
+    </div>
+  </div>
+
+  <div class="config-step">
+    <div class="step-title"><span class="step-num">2</span> Activar Google Sign-In</div>
+    <div class="step-body">
+      Dentro del proyecto → <code>Authentication</code> → <code>Sign-in method</code> → habilitá <code>Google</code>.
+    </div>
+  </div>
+
+  <div class="config-step">
+    <div class="step-title"><span class="step-num">3</span> Crear base de datos</div>
+    <div class="step-body">
+      Dentro del proyecto → <code>Firestore Database</code> → <code>Crear base de datos</code> → modo producción → elegí la región más cercana (ej: <code>us-east1</code>).<br><br>
+      Luego ir a <code>Reglas</code> y pegar esto:<br><br>
+      <code>rules_version = '2';<br>
+      service cloud.firestore {<br>
+      &nbsp;match /databases/{database}/documents {<br>
+      &nbsp;&nbsp;match /{document=**} {<br>
+      &nbsp;&nbsp;&nbsp;allow read, write: if request.auth != null;<br>
+      &nbsp;&nbsp;}<br>
+      &nbsp;}<br>
+      }</code>
+    </div>
+  </div>
+
+  <div class="config-step">
+    <div class="step-title"><span class="step-num">4</span> Obtener configuración</div>
+    <div class="step-body">
+      Dentro del proyecto → ícono ⚙️ → <code>Configuración del proyecto</code> → <code>Tus apps</code> → agregar app Web (<code>&lt;/&gt;</code>) → copiá el objeto <code>firebaseConfig</code>.
+    </div>
+  </div>
+
+  <div class="config-step">
+    <div class="step-title"><span class="step-num">5</span> Pegar configuración aquí</div>
+    <div class="step-body" style="margin-bottom:10px">Pegá los valores del <code>firebaseConfig</code>:</div>
+    <input class="fi" id="cfg-apikey" placeholder="apiKey" style="margin-bottom:8px">
+    <input class="fi" id="cfg-authDomain" placeholder="authDomain" style="margin-bottom:8px">
+    <input class="fi" id="cfg-projectId" placeholder="projectId" style="margin-bottom:8px">
+    <input class="fi" id="cfg-appId" placeholder="appId" style="margin-bottom:12px">
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="saveConfig()">
+      <i class="ti ti-device-floppy"></i> Guardar y conectar
+    </button>
+    <div id="cfg-error" style="font-size:12px;color:#C0392B;margin-top:8px;display:none"></div>
+  </div>
+</div>
+
+<!-- APP PRINCIPAL -->
+<div id="app">
+  <div class="sync-bar">
+    <div class="sync-dot" id="sync-dot"></div>
+    <span id="sync-label">Conectado</span>
+    <div class="user-info" onclick="logout()" title="Cerrar sesión">
+      <img id="user-avatar" class="user-avatar" src="" alt="">
+      <span style="font-size:11px;color:#AAA"><i class="ti ti-logout" style="font-size:12px"></i></span>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab on" id="t0" onclick="go(0)"><i class="ti ti-package"></i> Pedidos</div>
+    <div class="tab" id="t1" onclick="go(1)"><i class="ti ti-layers-intersect"></i> Lotes</div>
+    <div class="tab" id="t2" onclick="go(2)"><i class="ti ti-chart-bar"></i> Resumen</div>
+    <div class="tab" id="t3" onclick="go(3)"><i class="ti ti-books"></i> Catálogo</div>
+  </div>
+
+  <div class="view on" id="v0">
+    <button class="btn btn-primary btn-block" onclick="showModal()"><i class="ti ti-plus"></i> Nuevo pedido</button>
+    <div id="list-pedidos"></div>
+  </div>
+  <div class="view" id="v1">
+    <div class="filter-row" id="filters"></div>
+    <div id="list-lotes"></div>
+  </div>
+  <div class="view" id="v2">
+    <div class="stat-grid" id="stats"></div>
+    <div id="list-resumen"></div>
+  </div>
+  <div class="view" id="v3">
+    <div class="sort-bar">
+      <button class="sbtn on" id="sb-pop" onclick="setCatSort('pop')"><i class="ti ti-flame" style="font-size:12px"></i> Más vendidos</button>
+      <button class="sbtn" id="sb-az" onclick="setCatSort('az')"><i class="ti ti-sort-a-z" style="font-size:12px"></i> A-Z</button>
+      <button class="sbtn" id="sb-price" onclick="setCatSort('price')"><i class="ti ti-arrow-up" style="font-size:12px"></i> Precio</button>
+    </div>
+    <div id="list-cat"></div>
+    <div style="margin-top:18px;padding-top:16px;border-top:1px solid #E0E0DC">
+      <div class="sec" style="margin-top:0">Agregar producto</div>
+      <input id="c-nom" class="fi" placeholder="Nombre (ej: Caja 308 x50)" style="margin-bottom:8px">
+      <input id="c-pie" class="fi" placeholder="Piezas separadas por coma" style="margin-bottom:8px">
+      <input id="c-precio" class="fi" placeholder="Precio (ej: 30000)" style="margin-bottom:10px">
+      <button class="btn btn-sm" style="width:100%;justify-content:center" onclick="addCatalog()"><i class="ti ti-plus"></i> Agregar al catálogo</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NUEVO PEDIDO -->
+<div id="modal" style="display:none">
+  <div class="overlay" onclick="hideModal(event)">
+    <div class="sheet" onclick="event.stopPropagation()">
+      <div style="font-size:17px;font-weight:700;margin-bottom:14px;letter-spacing:-.02em">Nuevo pedido</div>
+      <div class="sec" style="margin-top:0">Datos</div>
+      <div class="g2" style="margin-bottom:0">
+        <input id="f-num" class="fi" placeholder="N° pedido">
+        <input id="f-cli" class="fi" placeholder="Cliente">
+      </div>
+      <div class="sec" style="margin-top:12px">Productos</div>
+      <div id="f-prods"></div>
+      <div style="display:flex;gap:8px;margin-bottom:4px;margin-top:4px">
+        <select id="f-sel" class="fi" style="flex:1"></select>
+        <button class="btn btn-sm" onclick="addProd()"><i class="ti ti-plus"></i></button>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button class="btn" style="flex:1;justify-content:center" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-primary" style="flex:1;justify-content:center" onclick="guardar()">Guardar pedido</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── FIREBASE CONFIG ───────────────────────────────────────────────────────────
+// Estos valores se cargan desde localStorage (configurados en la pantalla de setup)
+var FB_CONFIG_KEY = 'fbconfig_3d';
+
+function getSavedConfig() {
+  try { return JSON.parse(localStorage.getItem(FB_CONFIG_KEY)); } catch(e) { return null; }
+}
+
+function initFirebase(cfg) {
+  if (firebase.apps.length) return true;
+  try {
+    firebase.initializeApp(cfg);
+    return true;
+  } catch(e) {
+    console.error('Firebase init error', e);
+    return false;
+  }
+}
+
+// ─── CONFIG SCREEN ─────────────────────────────────────────────────────────────
+function showConfig() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('config-screen').style.display = 'block';
+  var saved = getSavedConfig();
+  if (saved) {
+    document.getElementById('cfg-apikey').value = saved.apiKey || '';
+    document.getElementById('cfg-authDomain').value = saved.authDomain || '';
+    document.getElementById('cfg-projectId').value = saved.projectId || '';
+    document.getElementById('cfg-appId').value = saved.appId || '';
+  }
+}
+
+function hideConfig() {
+  document.getElementById('config-screen').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+function saveConfig() {
+  var cfg = {
+    apiKey:       document.getElementById('cfg-apikey').value.trim(),
+    authDomain:   document.getElementById('cfg-authDomain').value.trim(),
+    projectId:    document.getElementById('cfg-projectId').value.trim(),
+    appId:        document.getElementById('cfg-appId').value.trim(),
+    storageBucket: document.getElementById('cfg-authDomain').value.trim().replace('firebaseapp.com','appspot.com'),
+    messagingSenderId: ''
+  };
+  var err = document.getElementById('cfg-error');
+  if (!cfg.apiKey || !cfg.authDomain || !cfg.projectId || !cfg.appId) {
+    err.textContent = 'Completá todos los campos.';
+    err.style.display = 'block';
+    return;
+  }
+  localStorage.setItem(FB_CONFIG_KEY, JSON.stringify(cfg));
+  err.style.display = 'none';
+  if (initFirebase(cfg)) {
+    hideConfig();
+    setupAuth();
+  } else {
+    err.textContent = 'Error al conectar. Verificá los datos.';
+    err.style.display = 'block';
+  }
+}
+
+// ─── AUTH ──────────────────────────────────────────────────────────────────────
+var db, uid_user;
+
+function setupAuth() {
+  firebase.auth().onAuthStateChanged(function(user) {
+    if (user) {
+      uid_user = user.uid;
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('config-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      var av = document.getElementById('user-avatar');
+      if (user.photoURL) av.src = user.photoURL;
+      else av.style.display = 'none';
+      db = firebase.firestore();
+      loadData();
+    } else {
+      document.getElementById('app').style.display = 'none';
+      document.getElementById('login-screen').style.display = 'flex';
+    }
+  });
+}
+
+function loginGoogle() {
+  var cfg = getSavedConfig();
+  var errEl = document.getElementById('login-error');
+  if (!cfg) {
+    errEl.textContent = 'Primero configurá Firebase (tocá el enlace de abajo).';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (!initFirebase(cfg)) {
+    errEl.textContent = 'Error al conectar con Firebase. Revisá la configuración.';
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+  var provider = new firebase.auth.GoogleAuthProvider();
+  firebase.auth().signInWithPopup(provider).catch(function(e) {
+    errEl.textContent = 'Error al iniciar sesión: ' + e.message;
+    errEl.style.display = 'block';
+  });
+}
+
+function logout() {
+  if (!confirm('¿Cerrar sesión?')) return;
+  firebase.auth().signOut();
+}
+
+// ─── SYNC STATUS ───────────────────────────────────────────────────────────────
+function setSyncing(state) {
+  var dot = document.getElementById('sync-dot');
+  var lbl = document.getElementById('sync-label');
+  if (state === 'syncing') { dot.className='sync-dot syncing'; lbl.textContent='Guardando...'; }
+  else if (state === 'ok')  { dot.className='sync-dot'; lbl.textContent='Sincronizado'; }
+  else                      { dot.className='sync-dot off'; lbl.textContent='Sin conexión'; }
+}
+
+// ─── DATA ──────────────────────────────────────────────────────────────────────
+var PIECES=['Tapa','Base','Traba','Centro'];
+var RAW_CAT=[
+  {id:'c308x10',   name:'Caja 308 x10',          price:15000,  pieces:PIECES,sales:0},
+  {id:'c4570x40',  name:'Caja .45-70 x40',        price:35000,  pieces:PIECES,sales:0},
+  {id:'c300wm40',  name:'Caja .300 Win Mag x40',  price:40000,  pieces:PIECES,sales:0},
+  {id:'c9mmc50',   name:'Caja 9mm compacta x50',  price:18000,  pieces:PIECES,sales:0},
+  {id:'c9mm50',    name:'Caja 9mm x50',           price:22000,  pieces:PIECES,sales:0},
+  {id:'c10mm50',   name:'Caja 10mm x50',          price:22000,  pieces:PIECES,sales:0},
+  {id:'c38s50',    name:'Caja .38 Super x50',     price:22000,  pieces:PIECES,sales:0},
+  {id:'c40sw50',   name:'Caja .40 S&W x50',       price:22000,  pieces:PIECES,sales:0},
+  {id:'c45acp50',  name:'Caja .45 ACP x50',       price:22000,  pieces:PIECES,sales:0},
+  {id:'c380x50',   name:'Caja .380 x50',          price:22000,  pieces:PIECES,sales:0},
+  {id:'c38x50',    name:'Caja .38 x50',           price:25000,  pieces:PIECES,sales:0},
+  {id:'c357x50',   name:'Caja .357 x50',          price:25000,  pieces:PIECES,sales:0},
+  {id:'c44mx50',   name:'Caja .44 Mag x50',       price:25000,  pieces:PIECES,sales:0},
+  {id:'c45cx50',   name:'Caja .45 Colt x50',      price:25000,  pieces:PIECES,sales:0},
+  {id:'c57x50',    name:'Caja 5.7x28 x50',        price:25000,  pieces:PIECES,sales:0},
+  {id:'c454x50',   name:'Caja .454 Casull x50',   price:25000,  pieces:PIECES,sales:0},
+  {id:'c65c50',    name:'Caja 6.5 Creedmoor x50', price:30000,  pieces:PIECES,sales:0},
+  {id:'c762x39x50',name:'Caja 7.62x39 x50',       price:30000,  pieces:PIECES,sales:0},
+  {id:'c762x51x50',name:'Caja 7.62x51 x50',       price:30000,  pieces:PIECES,sales:0},
+  {id:'c22250x50', name:'Caja .22-250 x50',       price:30000,  pieces:PIECES,sales:0},
+  {id:'c65gx50',   name:'Caja 6.5 Grendel x50',   price:30000,  pieces:PIECES,sales:0},
+  {id:'c3030x50',  name:'Caja .30-30 x50',        price:30000,  pieces:PIECES,sales:0},
+  {id:'c243x50',   name:'Caja .243 Win x50',      price:30000,  pieces:PIECES,sales:0},
+  {id:'c300bx50',  name:'Caja .300 BLK x50',      price:30000,  pieces:PIECES,sales:0},
+  {id:'c350lx50',  name:'Caja 350 Legend x50',    price:30000,  pieces:PIECES,sales:0},
+  {id:'c308x50',   name:'Caja .308 x50',          price:30000,  pieces:PIECES,sales:0},
+  {id:'c556x50',   name:'Caja 556 x50',           price:30000,  pieces:PIECES,sales:0},
+  {id:'c6arcx50',  name:'Caja 6mm ARC x50',       price:30000,  pieces:PIECES,sales:0},
+  {id:'c3006x50',  name:'Caja .30-06 x50',        price:35000,  pieces:PIECES,sales:0},
+  {id:'c270x50',   name:'Caja .270 x50',          price:35000,  pieces:PIECES,sales:0},
+  {id:'c300wmx80', name:'Caja .300 Win Mag x80',  price:62500,  pieces:PIECES,sales:0},
+  {id:'c17hmr',    name:'Caja .17 HMR x100',      price:22000,  pieces:PIECES,sales:0},
+  {id:'c22wmr',    name:'Caja .22 WMR x100',      price:22000,  pieces:PIECES,sales:0},
+  {id:'c22lr',     name:'Caja .22 LR x100',       price:22000,  pieces:PIECES,sales:0},
+  {id:'c9mm100',   name:'Caja 9mm x100',          price:35000,  pieces:PIECES,sales:0},
+  {id:'c38s100',   name:'Caja .38 Super x100',    price:35000,  pieces:PIECES,sales:0},
+  {id:'c45acp100', name:'Caja .45 ACP x100',      price:35000,  pieces:PIECES,sales:0},
+  {id:'c10mm100',  name:'Caja 10mm x100',         price:35000,  pieces:PIECES,sales:0},
+  {id:'c40x100',   name:'Caja .40 x100',          price:35000,  pieces:PIECES,sales:0},
+  {id:'c380x100',  name:'Caja .380 x100',         price:35000,  pieces:PIECES,sales:0},
+  {id:'c38sp100',  name:'Caja 38 Special x100',   price:45000,  pieces:PIECES,sales:0},
+  {id:'c357mx100', name:'Caja 357 MAG x100',      price:45000,  pieces:PIECES,sales:0},
+  {id:'c300bx100', name:'Caja 300 Blackout x100', price:50000,  pieces:PIECES,sales:0},
+  {id:'c762x51100',name:'Caja 7.62x51 x100',      price:50000,  pieces:PIECES,sales:0},
+  {id:'c762x39100',name:'Caja 7.62x39 x100',      price:50000,  pieces:PIECES,sales:0},
+  {id:'c223x100',  name:'Caja .223 x100',         price:50000,  pieces:PIECES,sales:0},
+  {id:'c308x100',  name:'Caja .308 x100',         price:50000,  pieces:PIECES,sales:0},
+  {id:'c556x100',  name:'Caja 556 x100',          price:50000,  pieces:PIECES,sales:0},
+  {id:'c243x100',  name:'Caja 243 Win x100',      price:50000,  pieces:PIECES,sales:0},
+  {id:'c3006x100', name:'Caja 30-06 x100',        price:55000,  pieces:PIECES,sales:0},
+  {id:'c270x100',  name:'Caja .270 x100',         price:55000,  pieces:PIECES,sales:0},
+];
+
+var cat=[], orders=[], tmp=[], filt='todas', catSort='pop';
+
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
+function fmt(n){return '$'+n.toLocaleString('es-AR');}
+function popColor(s){return s>=10?'#2ECC71':s>=5?'#378ADD':s>=1?'#F39C12':'#CCCCCC';}
+
+function buildPieces(cp,color,letras,nombre,logo,enT,enB){
+  return cp.map(function(n){
+    var it=n==='Tapa',ib=n==='Base',g=(it&&enT)||(ib&&enB);
+    return{name:n,done:false,color:color,letras:g?letras:'',nombre:g?nombre:'',logo:g?logo:''};
+  });
+}
+
+// ─── FIRESTORE ─────────────────────────────────────────────────────────────────
+function userDoc() { return db.collection('users').doc(uid_user); }
+
+function loadData() {
+  setSyncing('syncing');
+  userDoc().get().then(function(snap) {
+    if (snap.exists) {
+      var d = snap.data();
+      cat    = d.cat    || [];
+      orders = d.orders || [];
+      if (!cat.length) cat = RAW_CAT.map(function(c){return Object.assign({},c);});
+    } else {
+      cat    = RAW_CAT.map(function(c){return Object.assign({},c);});
+      orders = [{
+        id:'ord96', number:'96', client:'Oscar Torres', createdAt:Date.now(),
+        products:[
+          {pid:'c3006x50', pname:'Caja .30-06 x50', catPieces:PIECES,
+           pieces:buildPieces(PIECES,'Anaranjado','Negro','ALBANO','Fusil',true,false)},
+          {pid:'c223x100', pname:'Caja .223 x100',  catPieces:PIECES,
+           pieces:buildPieces(PIECES,'Verde','Blanco','YONII','Jabalí',true,false)},
+          {pid:'c9mm50',   pname:'Caja 9mm x50',    catPieces:PIECES,
+           pieces:buildPieces(PIECES,'Gris','Negro','SEBASTIAN','Ciervo',true,false)},
+        ]
+      }];
+      saveToCloud();
+    }
+    setSyncing('ok');
+    render();
+  }).catch(function(e){
+    console.error(e);
+    setSyncing('off');
+  });
+
+  // Escuchar cambios en tiempo real
+  userDoc().onSnapshot(function(snap) {
+    if (!snap.exists) return;
+    var d = snap.data();
+    cat    = d.cat    || cat;
+    orders = d.orders || orders;
+    setSyncing('ok');
+    render();
+  }, function(e){ setSyncing('off'); });
+}
+
+function saveToCloud() {
+  setSyncing('syncing');
+  userDoc().set({ cat: cat, orders: orders }, { merge: true })
+    .then(function(){ setSyncing('ok'); })
+    .catch(function(e){ console.error(e); setSyncing('off'); });
+}
+
+// ─── UI ────────────────────────────────────────────────────────────────────────
+function go(i){
+  document.querySelectorAll('.tab').forEach(function(t,j){t.classList.toggle('on',i===j);});
+  document.querySelectorAll('.view').forEach(function(v,j){v.classList.toggle('on',i===j);});
+}
+
+function showModal(){
+  tmp=[];
+  document.getElementById('f-num').value='';
+  document.getElementById('f-cli').value='';
+  refreshSel(); refreshProds();
+  document.getElementById('modal').style.display='block';
+}
+function closeModal(){document.getElementById('modal').style.display='none';}
+function hideModal(e){if(e.target.classList.contains('overlay'))closeModal();}
+
+function refreshSel(){
+  var sorted=cat.slice().sort(function(a,b){return(b.sales||0)-(a.sales||0);});
+  var s=document.getElementById('f-sel');
+  s.innerHTML='<option value="">— elegí un producto —</option>'+
+    sorted.map(function(p){
+      var ico=p.sales>=10?'🔥 ':p.sales>=5?'⭐ ':p.sales>=1?'· ':'';
+      return'<option value="'+p.id+'">'+ico+p.name+' — '+fmt(p.price)+'</option>';
+    }).join('');
+}
+
+function addProd(){
+  var id=document.getElementById('f-sel').value;
+  if(!id)return;
+  var p=cat.find(function(c){return c.id===id;});
+  if(!p)return;
+  tmp.push({pid:p.id,pname:p.name,catPieces:p.pieces,color:'',letras:'',nombre:'',logo:'',enTapa:true,enBase:false});
+  refreshProds();
+  document.getElementById('f-sel').value='';
+}
+
+function removeTP(i){tmp.splice(i,1);refreshProds();}
+function toggleDest(i,f){tmp[i][f]=!tmp[i][f];refreshProds();}
+
+function refreshProds(){
+  var el=document.getElementById('f-prods');
+  if(!tmp.length){el.innerHTML='<p style="font-size:13px;color:#AAA;margin-bottom:8px">Ningún producto agregado.</p>';return;}
+  el.innerHTML=tmp.map(function(p,i){
+    return'<div class="prod-block">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'+
+        '<span style="font-size:14px;font-weight:600">'+p.pname+'</span>'+
+        '<span style="cursor:pointer;color:#AAA;padding:2px 5px;font-size:16px" onclick="removeTP('+i+')"><i class="ti ti-x"></i></span>'+
+      '</div>'+
+      '<div class="g2" style="margin-bottom:8px">'+
+        '<input class="fi" placeholder="Color caja" oninput="tmp['+i+'].color=this.value" value="'+p.color+'">'+
+        '<input class="fi" placeholder="Color letras" oninput="tmp['+i+'].letras=this.value" value="'+p.letras+'">'+
+      '</div>'+
+      '<div class="g2" style="margin-bottom:10px">'+
+        '<input class="fi" placeholder="Nombre grabado" oninput="tmp['+i+'].nombre=this.value" value="'+p.nombre+'">'+
+        '<input class="fi" placeholder="Logo" oninput="tmp['+i+'].logo=this.value" value="'+p.logo+'">'+
+      '</div>'+
+      '<div style="font-size:10px;font-weight:700;color:#999;letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px">Grabado en</div>'+
+      '<div class="piece-dest">'+
+        '<div class="toggle-check" onclick="toggleDest('+i+',\'enTapa\')">'+
+          '<div class="box'+(p.enTapa?' on':'')+'">'+(p.enTapa?'<i class="ti ti-check" style="font-size:11px"></i>':'')+'</div>'+
+          '<span>Tapa</span></div>'+
+        '<div class="toggle-check" onclick="toggleDest('+i+',\'enBase\')">'+
+          '<div class="box'+(p.enBase?' on':'')+'">'+(p.enBase?'<i class="ti ti-check" style="font-size:11px"></i>':'')+'</div>'+
+          '<span>Base</span></div>'+
+      '</div></div>';
+  }).join('');
+}
+
+function addCatalog(){
+  var nom=document.getElementById('c-nom').value.trim();
+  var pie=document.getElementById('c-pie').value.trim();
+  var pr=parseInt(document.getElementById('c-precio').value)||0;
+  if(!nom||!pie){alert('Completá nombre y piezas.');return;}
+  var pieces=pie.split(',').map(function(s){return s.trim();}).filter(Boolean);
+  cat.push({id:uid(),name:nom,pieces:pieces,price:pr,sales:0});
+  saveToCloud(); renderCatalog();
+  document.getElementById('c-nom').value='';
+  document.getElementById('c-pie').value='';
+  document.getElementById('c-precio').value='';
+  alert('"'+nom+'" agregado al catálogo.');
+}
+
+function guardar(){
+  var num=document.getElementById('f-num').value.trim();
+  var cli=document.getElementById('f-cli').value.trim();
+  if(!cli){alert('Escribí el nombre del cliente.');return;}
+  if(!tmp.length){alert('Agregá al menos un producto.');return;}
+  var prods=tmp.map(function(p){
+    return{pid:p.pid,pname:p.pname,catPieces:p.catPieces,
+      pieces:buildPieces(p.catPieces,p.color,p.letras,p.nombre,p.logo,p.enTapa,p.enBase)};
+  });
+  tmp.forEach(function(p){var c=cat.find(function(c){return c.id===p.pid;});if(c)c.sales=(c.sales||0)+1;});
+  orders.unshift({id:uid(),number:num,client:cli,createdAt:Date.now(),products:prods});
+  saveToCloud(); closeModal(); render();
+}
+
+function toggle(oid,pi,pci){
+  var o=orders.find(function(x){return x.id===oid;});
+  if(!o)return;
+  o.products[pi].pieces[pci].done=!o.products[pi].pieces[pci].done;
+  saveToCloud(); render();
+}
+
+function delOrder(id){
+  if(!confirm('¿Eliminar este pedido?'))return;
+  orders=orders.filter(function(o){return o.id!==id;});
+  saveToCloud(); render();
+}
+
+function progress(o){
+  var t=0,d=0;
+  o.products.forEach(function(p){t+=p.pieces.length;d+=p.pieces.filter(function(pc){return pc.done;}).length;});
+  return{t:t,d:d};
+}
+
+function bc(d,t){return d===0?'bp':d===t&&t>0?'bd':'bx';}
+function bt(d,t){return d===0?'Pendiente':d===t&&t>0?'Completo':d+'/'+t;}
+
+function tags(pc){
+  var out=[];
+  if(pc.color)out.push('<span class="tag">'+pc.color+'</span>');
+  if(pc.letras)out.push('<span class="tag">Letras: '+pc.letras+'</span>');
+  if(pc.nombre)out.push('<span class="tag">'+pc.nombre+'</span>');
+  if(pc.logo)out.push('<span class="tag">'+pc.logo+'</span>');
+  return out.length?'<div class="tags">'+out.join('')+'</div>':'';
+}
+
+function render(){renderPedidos();renderLotes();renderResumen();renderCatalog();}
+
+function renderPedidos(){
+  var el=document.getElementById('list-pedidos');
+  if(!orders.length){el.innerHTML='<div class="empty">No hay pedidos aún.</div>';return;}
+  el.innerHTML=orders.map(function(o){
+    var p=progress(o),pct=p.t?Math.round(p.d/p.t*100):0;
+    var prods=o.products.map(function(pr,pi){
+      var pdone=pr.pieces.filter(function(pc){return pc.done;}).length;
+      return'<div style="margin-top:11px">'+
+        '<div class="prod-title">'+pr.pname+' ('+pdone+'/'+pr.pieces.length+')</div>'+
+        pr.pieces.map(function(pc,pci){
+          return'<div class="row">'+
+            '<div class="chk'+(pc.done?' on':'')+'" onclick="toggle(\''+o.id+'\','+pi+','+pci+')">'+
+              (pc.done?'<i class="ti ti-check" style="font-size:12px"></i>':'')+
+            '</div>'+
+            '<div style="flex:1"><div class="pname'+(pc.done?' done':'')+'">'+pc.name+'</div>'+(!pc.done?tags(pc):'')+
+            '</div></div>';
+        }).join('')+'</div>';
+    }).join('');
+    return'<div class="card">'+
+      '<div class="header-bar">'+
+        '<div>'+
+          '<div class="order-name">'+o.client+(o.number?' <span class="order-num">#'+o.number+'</span>':'')+'</div>'+
+          '<div class="order-sub">'+o.products.length+' producto'+(o.products.length!==1?'s':'')+' · '+p.t+' piezas</div>'+
+        '</div>'+
+        '<span class="badge '+bc(p.d,p.t)+'">'+bt(p.d,p.t)+'</span>'+
+      '</div>'+
+      '<div class="pbar"><div class="pfill" style="width:'+pct+'%"></div></div>'+
+      '<div style="font-size:12px;color:#AAA;margin-bottom:2px">'+pct+'% completado</div>'+
+      prods+
+      '<div class="order-actions"><button class="btn btn-del" onclick="delOrder(\''+o.id+'\')"><i class="ti ti-trash"></i> Eliminar</button></div>'+
+    '</div>';
+  }).join('');
+}
+
+function setFilter(f){
+  filt=f;
+  document.querySelectorAll('.fbtn').forEach(function(b){b.classList.toggle('on',b.dataset.f===f);});
+  renderLotes();
+}
+
+function renderLotes(){
+  var fr=document.getElementById('filters'),el=document.getElementById('list-lotes');
+  var map={};
+  orders.forEach(function(o){
+    o.products.forEach(function(p,pi){
+      p.pieces.forEach(function(pc,pci){
+        if(!map[pc.name])map[pc.name]=[];
+        map[pc.name].push({oid:o.id,client:o.client,num:o.number,pname:p.pname,pi:pi,pci:pci,pc:pc});
+      });
+    });
+  });
+  var types=Object.keys(map).sort();
+  fr.innerHTML='<button class="fbtn'+(filt==='todas'?' on':'')+'" data-f="todas" onclick="setFilter(\'todas\')">Todas</button>'+
+    types.map(function(t){return'<button class="fbtn'+(filt===t?' on':'')+'" data-f="'+t+'" onclick="setFilter(\''+t+'\')">'+t+'</button>';}).join('');
+  if(!types.length){el.innerHTML='<div class="empty">Cargá pedidos para ver los lotes.</div>';return;}
+  var show=filt==='todas'?types:types.filter(function(t){return t===filt;});
+  el.innerHTML=show.map(function(type){
+    var items=map[type];
+    var pend=items.filter(function(i){return!i.pc.done;});
+    var done=items.filter(function(i){return i.pc.done;});
+    return'<div class="card">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'+
+        '<span style="font-size:15px;font-weight:700">'+type+'</span>'+
+        '<span class="badge '+bc(done.length,items.length)+'">'+done.length+'/'+items.length+'</span>'+
+      '</div>'+
+      (pend.length?'<div style="font-size:11px;font-weight:700;color:#AAA;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em">Pendientes ('+pend.length+')</div>'+
+        pend.map(function(i){
+          return'<div class="row">'+
+            '<div class="chk" onclick="toggle(\''+i.oid+'\','+i.pi+','+i.pci+')" style="margin-top:2px;flex-shrink:0"></div>'+
+            '<div style="flex:1">'+
+              '<div style="font-size:14px;font-weight:600">'+i.client+(i.num?' <span style="font-size:11px;color:#AAA;font-weight:400">#'+i.num+'</span>':'')+'</div>'+
+              '<div style="font-size:12px;color:#999">'+i.pname+'</div>'+tags(i.pc)+
+            '</div></div>';
+        }).join(''):'')  +
+      (done.length?'<div style="font-size:11px;font-weight:700;color:#AAA;margin:9px 0 6px;text-transform:uppercase;letter-spacing:.04em">Listas ('+done.length+')</div>'+
+        done.map(function(i){
+          return'<div class="row" style="opacity:.35">'+
+            '<div class="chk on" onclick="toggle(\''+i.oid+'\','+i.pi+','+i.pci+')" style="flex-shrink:0"><i class="ti ti-check" style="font-size:12px"></i></div>'+
+            '<div><div style="font-size:14px;text-decoration:line-through">'+i.client+' — '+i.pname+'</div></div></div>';
+        }).join(''):'')  +
+    '</div>';
+  }).join('');
+}
+
+function renderResumen(){
+  var t=0,d=0;
+  orders.forEach(function(o){var p=progress(o);t+=p.t;d+=p.d;});
+  var pct=t?Math.round(d/t*100):0;
+  var comp=orders.filter(function(o){var p=progress(o);return p.d===p.t&&p.t>0;}).length;
+  document.getElementById('stats').innerHTML=
+    '<div class="stat"><div class="stat-l">Pedidos</div><div class="stat-v">'+orders.length+'</div></div>'+
+    '<div class="stat"><div class="stat-l">Completos</div><div class="stat-v">'+comp+'</div></div>'+
+    '<div class="stat"><div class="stat-l">Piezas totales</div><div class="stat-v">'+t+'</div></div>'+
+    '<div class="stat"><div class="stat-l">Progreso</div><div class="stat-v">'+pct+'%</div></div>';
+  document.getElementById('list-resumen').innerHTML=
+    '<div class="sec">Estado por pedido</div>'+
+    (orders.length?orders.map(function(o){
+      var p=progress(o),pct2=p.t?Math.round(p.d/p.t*100):0;
+      return'<div class="card" style="padding:11px 14px">'+
+        '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">'+
+          '<div style="font-weight:700;font-size:14px">'+o.client+(o.number?' <span style="font-size:11px;color:#AAA;font-weight:400">#'+o.number+'</span>':'')+'</div>'+
+          '<span class="badge '+bc(p.d,p.t)+'">'+bt(p.d,p.t)+'</span>'+
+        '</div>'+
+        '<div class="pbar"><div class="pfill" style="width:'+pct2+'%"></div></div>'+
+        '<div style="font-size:12px;color:#AAA">'+p.d+'/'+p.t+' piezas · '+pct2+'%</div></div>';
+    }).join(''):'<div class="empty" style="padding:20px 0">Sin pedidos.</div>');
+}
+
+function setCatSort(s){
+  catSort=s;
+  document.querySelectorAll('.sbtn').forEach(function(b){b.classList.toggle('on',b.id==='sb-'+s);});
+  renderCatalog();
+}
+
+function renderCatalog(){
+  var el=document.getElementById('list-cat');
+  var sorted=cat.slice();
+  if(catSort==='pop')sorted.sort(function(a,b){return(b.sales||0)-(a.sales||0);});
+  else if(catSort==='az')sorted.sort(function(a,b){return a.name.localeCompare(b.name);});
+  else sorted.sort(function(a,b){return(a.price||0)-(b.price||0);});
+  if(catSort==='pop'){
+    var groups=[
+      {label:'🔥 Más vendidos (10+)',items:sorted.filter(function(c){return(c.sales||0)>=10;})},
+      {label:'⭐ Frecuentes (5–9)',  items:sorted.filter(function(c){return(c.sales||0)>=5&&(c.sales||0)<10;})},
+      {label:'· Ocasionales (1–4)', items:sorted.filter(function(c){return(c.sales||0)>=1&&(c.sales||0)<5;})},
+      {label:'Sin ventas aún',      items:sorted.filter(function(c){return!(c.sales||0);})},
+    ].filter(function(g){return g.items.length;});
+    el.innerHTML='<div class="card">'+groups.map(function(g){
+      return'<div class="group-label">'+g.label+'</div>'+g.items.map(catRow).join('');
+    }).join('')+'</div>';
+  } else {
+    el.innerHTML='<div class="card">'+sorted.map(catRow).join('')+'</div>';
+  }
+}
+
+function catRow(c){
+  return'<div class="cat-row">'+
+    '<div style="width:9px;height:9px;border-radius:50%;background:'+popColor(c.sales||0)+';flex-shrink:0;margin-top:4px"></div>'+
+    '<div style="flex:1">'+
+      '<div style="font-size:14px">'+c.name+'</div>'+
+      '<div style="font-size:12px;color:#999">'+fmt(c.price||0)+' · '+((c.sales||0)+' vendido'+(c.sales!==1?'s':''))+'</div>'+
+    '</div></div>';
+}
+
+// ─── INICIO ────────────────────────────────────────────────────────────────────
+(function init(){
+  var cfg = getSavedConfig();
+  if (cfg && initFirebase(cfg)) {
+    setupAuth();
+  } else {
+    document.getElementById('login-screen').style.display = 'flex';
+  }
+})();
+</script>
+</body>
+</html>
