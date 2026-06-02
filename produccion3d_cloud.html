@@ -5,46 +5,36 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Producción 3D</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-
-<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;background:#F7F7F5}
 body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1A1A1A;font-size:15px;max-width:480px;margin:0 auto;background:#F7F7F5}
-
-/* LOGIN */
 #login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 24px;text-align:center}
 .login-logo{font-size:48px;margin-bottom:16px}
 .login-title{font-size:22px;font-weight:700;letter-spacing:-.02em;margin-bottom:6px}
 .login-sub{font-size:14px;color:#888;margin-bottom:32px;line-height:1.5}
-.login-btn{display:inline-flex;align-items:center;gap:10px;padding:13px 22px;border:1.5px solid #D0D0CC;border-radius:12px;font-size:15px;cursor:pointer;background:#fff;color:#1A1A1A;font-family:inherit;font-weight:500;box-shadow:0 2px 8px rgba(0,0,0,.08);transition:all .15s;width:100%;justify-content:center;max-width:300px}
-.login-btn:active{background:#F3F3F0}
+.login-btn{display:inline-flex;align-items:center;gap:10px;padding:13px 22px;border:1.5px solid #D0D0CC;border-radius:12px;font-size:15px;cursor:pointer;background:#fff;color:#1A1A1A;font-family:inherit;font-weight:500;box-shadow:0 2px 8px rgba(0,0,0,.08);width:100%;justify-content:center;max-width:300px}
 .login-btn img{width:20px;height:20px}
 .sync-bar{display:flex;align-items:center;gap:6px;padding:7px 14px;background:#fff;border-bottom:1px solid #E8E8E4;font-size:12px;color:#888}
 .sync-dot{width:7px;height:7px;border-radius:50%;background:#2ECC71;flex-shrink:0}
-.sync-dot.off{background:#CCCCCC}
+.sync-dot.off{background:#CCC}
 .sync-dot.syncing{background:#F39C12;animation:pulse 1s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .user-info{margin-left:auto;display:flex;align-items:center;gap:6px;cursor:pointer}
 .user-avatar{width:22px;height:22px;border-radius:50%;border:1px solid #E0E0DC}
-
-/* APP */
 #app{display:none}
 .tabs{display:flex;border-bottom:1px solid #E0E0DC;position:sticky;top:0;background:#F7F7F5;z-index:10;padding-top:8px}
-.tab{flex:1;padding:8px 4px;text-align:center;font-size:12px;cursor:pointer;color:#888;border-bottom:2px solid transparent;transition:all .15s;letter-spacing:.01em}
+.tab{flex:1;padding:8px 4px;text-align:center;font-size:12px;cursor:pointer;color:#888;border-bottom:2px solid transparent;letter-spacing:.01em}
 .tab.on{color:#1A1A1A;border-color:#1A1A1A;font-weight:600}
 .view{display:none;padding:14px 14px 80px}
 .view.on{display:block}
 .card{background:#fff;border:1px solid #E8E8E4;border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border:1px solid #D0D0CC;border-radius:9px;font-size:13px;cursor:pointer;background:transparent;color:#1A1A1A;font-family:inherit;-webkit-appearance:none;transition:background .12s}
-.btn:active{background:#EBEBEB}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border:1px solid #D0D0CC;border-radius:9px;font-size:13px;cursor:pointer;background:transparent;color:#1A1A1A;font-family:inherit;-webkit-appearance:none}
 .btn-block{width:100%;justify-content:center;margin-bottom:12px}
 .btn-primary{background:#1A1A1A;color:#fff;border-color:#1A1A1A}
-.btn-primary:active{background:#333}
 .btn-sm{padding:6px 11px;font-size:12px}
 .btn-del{color:#C0392B;border-color:#F5AEAE;font-size:12px;padding:6px 11px}
 .badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap}
@@ -55,14 +45,14 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1A1A1A;font-
 .pfill{height:100%;background:#2ECC71;border-radius:3px;transition:width .3s}
 .row{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid #F0F0EC}
 .row:last-child{border-bottom:none}
-.chk{width:23px;height:23px;min-width:23px;border-radius:6px;border:1.5px solid #CCCCCC;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all .15s;background:#fff}
+.chk{width:23px;height:23px;min-width:23px;border-radius:6px;border:1.5px solid #CCC;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:1px;background:#fff}
 .chk.on{background:#2ECC71;border-color:#2ECC71;color:#fff}
 .pname{font-size:14px;font-weight:500}
-.pname.done{text-decoration:line-through;color:#AAAAAA}
+.pname.done{text-decoration:line-through;color:#AAA}
 .tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
 .tag{font-size:11px;padding:2px 8px;border-radius:20px;background:#F3F3F0;color:#666;border:1px solid #E8E8E4}
 .sec{font-size:10px;font-weight:700;color:#999;letter-spacing:.08em;text-transform:uppercase;margin:16px 0 7px}
-.fi{display:block;width:100%;padding:9px 11px;border:1px solid #D8D8D4;border-radius:8px;font-family:inherit;font-size:14px;background:#fff;color:#1A1A1A;-webkit-appearance:none;margin-bottom:0;outline:none;transition:border-color .15s}
+.fi{display:block;width:100%;padding:9px 11px;border:1px solid #D8D8D4;border-radius:8px;font-family:inherit;font-size:14px;background:#fff;color:#1A1A1A;-webkit-appearance:none;outline:none}
 .fi:focus{border-color:#1A1A1A}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
@@ -75,42 +65,48 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1A1A1A;font-
 .fbtn.on{background:#1A1A1A;color:#fff;border-color:#1A1A1A}
 .empty{text-align:center;padding:48px 16px;color:#AAA;font-size:14px}
 .toggle-check{display:flex;align-items:center;gap:7px;cursor:pointer;user-select:none}
-.toggle-check .box{width:19px;height:19px;min-width:19px;border-radius:5px;border:1.5px solid #CCCCCC;display:flex;align-items:center;justify-content:center;transition:all .15s;background:#fff}
+.toggle-check .box{width:19px;height:19px;min-width:19px;border-radius:5px;border:1.5px solid #CCC;display:flex;align-items:center;justify-content:center;background:#fff}
 .toggle-check .box.on{background:#2ECC71;border-color:#2ECC71;color:#fff}
 .toggle-check span{font-size:13px;color:#555}
 .piece-dest{display:flex;gap:16px;margin-top:8px}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:50;display:flex;align-items:flex-end}
 .sheet{background:#F7F7F5;border-radius:18px 18px 0 0;padding:18px 16px 32px;width:100%;max-height:92vh;overflow-y:auto}
 .prod-block{border:1px solid #E0E0DC;border-radius:10px;padding:12px;margin-bottom:8px;background:#fff}
-.cat-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #F0F0EC}
-.cat-row:last-child{border-bottom:none}
 .sort-bar{display:flex;gap:7px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px}
 .sbtn{padding:6px 12px;border-radius:8px;font-size:12px;cursor:pointer;border:1px solid #D8D8D4;background:#fff;color:#666;font-family:inherit;white-space:nowrap}
 .sbtn.on{background:#1A1A1A;color:#fff;border-color:#1A1A1A;font-weight:500}
 .group-label{font-size:11px;font-weight:700;color:#999;letter-spacing:.06em;text-transform:uppercase;margin:16px 0 5px;padding-bottom:5px;border-bottom:1px solid #EBEBEB}
 .order-actions{margin-top:12px;display:flex;justify-content:flex-end}
 .header-bar{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px}
-.order-name{font-weight:700;font-size:15px;letter-spacing:-.01em}
+.order-name{font-weight:700;font-size:15px}
 .order-sub{font-size:13px;color:#888;margin-top:2px}
 .order-num{font-size:11px;color:#AAA;font-weight:400}
 .prod-title{font-size:13px;font-weight:600;color:#888;margin-bottom:5px}
-
-/* CONFIG SCREEN */
+/* CARPETA CATÁLOGO */
+.folder{border:1px solid #E8E8E4;border-radius:12px;margin-bottom:10px;overflow:hidden}
+.folder-header{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:#fff;cursor:pointer;user-select:none}
+.folder-title{font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px}
+.folder-meta{font-size:12px;color:#AAA}
+.folder-body{display:none;padding:0 16px 12px;background:#fff;border-top:1px solid #F0F0EC}
+.folder-body.open{display:block}
+.cat-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #F0F0EC}
+.cat-row:last-child{border-bottom:none}
+/* CONFIG */
 #config-screen{display:none;padding:24px 20px 60px}
-.config-title{font-size:20px;font-weight:700;margin-bottom:4px;letter-spacing:-.02em}
-.config-sub{font-size:13px;color:#888;margin-bottom:24px;line-height:1.5}
 .config-step{background:#fff;border:1px solid #E8E8E4;border-radius:12px;padding:16px;margin-bottom:12px}
 .step-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#1A1A1A;color:#fff;font-size:11px;font-weight:700;margin-right:8px;flex-shrink:0}
 .step-title{font-weight:600;font-size:14px;display:flex;align-items:center;margin-bottom:8px}
 .step-body{font-size:13px;color:#555;line-height:1.6}
-.step-body code{background:#F3F3F0;padding:1px 6px;border-radius:4px;font-family:monospace;font-size:12px;color:#1A1A1A}
+.step-body code{background:#F3F3F0;padding:1px 6px;border-radius:4px;font-family:monospace;font-size:12px}
 .step-body a{color:#1A1A1A;font-weight:600}
-.field-note{font-size:12px;color:#AAA;margin-top:4px}
+/* TIPO badge */
+.type-badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;letter-spacing:.03em}
+.type-caja{background:#E8F0FC;color:#1A4D9A}
+.type-otro{background:#F3EDF9;color:#5B2D8E}
 </style>
 </head>
 <body>
 
-<!-- PANTALLA DE LOGIN -->
 <div id="login-screen">
   <div class="login-logo">📦</div>
   <div class="login-title">Producción 3D</div>
@@ -120,87 +116,52 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1A1A1A;font-
     Continuar con Google
   </button>
   <div id="login-error" style="margin-top:16px;font-size:13px;color:#C0392B;display:none"></div>
-  <button style="margin-top:24px;background:none;border:none;font-size:12px;color:#BBB;cursor:pointer;text-decoration:underline" onclick="showConfig()">
-    ¿Primera vez? Configurar Firebase
-  </button>
+  <button style="margin-top:24px;background:none;border:none;font-size:12px;color:#BBB;cursor:pointer;text-decoration:underline" onclick="showConfig()">¿Primera vez? Configurar Firebase</button>
 </div>
 
-<!-- PANTALLA DE CONFIGURACIÓN -->
 <div id="config-screen">
   <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px">
     <button class="btn btn-sm" onclick="hideConfig()"><i class="ti ti-arrow-left"></i></button>
     <span style="font-weight:700;font-size:16px">Configurar Firebase</span>
   </div>
-
   <div class="config-step">
-    <div class="step-title"><span class="step-num">1</span> Crear proyecto en Firebase</div>
-    <div class="step-body">
-      Entrá a <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> con tu cuenta Google y creá un proyecto nuevo. Podés llamarlo <code>produccion-3d</code>.
-    </div>
+    <div class="step-title"><span class="step-num">1</span>Crear proyecto</div>
+    <div class="step-body">Entrá a <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> y creá un proyecto llamado <code>produccion-3d</code>.</div>
   </div>
-
   <div class="config-step">
-    <div class="step-title"><span class="step-num">2</span> Activar Google Sign-In</div>
-    <div class="step-body">
-      Dentro del proyecto → <code>Authentication</code> → <code>Sign-in method</code> → habilitá <code>Google</code>.
-    </div>
+    <div class="step-title"><span class="step-num">2</span>Activar Google Sign-In</div>
+    <div class="step-body">Authentication → Sign-in method → Google → Habilitar → Guardar.</div>
   </div>
-
   <div class="config-step">
-    <div class="step-title"><span class="step-num">3</span> Crear base de datos</div>
-    <div class="step-body">
-      Dentro del proyecto → <code>Firestore Database</code> → <code>Crear base de datos</code> → modo producción → elegí la región más cercana (ej: <code>us-east1</code>).<br><br>
-      Luego ir a <code>Reglas</code> y pegar esto:<br><br>
-      <code>rules_version = '2';<br>
-      service cloud.firestore {<br>
-      &nbsp;match /databases/{database}/documents {<br>
-      &nbsp;&nbsp;match /{document=**} {<br>
-      &nbsp;&nbsp;&nbsp;allow read, write: if request.auth != null;<br>
-      &nbsp;&nbsp;}<br>
-      &nbsp;}<br>
-      }</code>
-    </div>
+    <div class="step-title"><span class="step-num">3</span>Crear Firestore</div>
+    <div class="step-body">Firestore Database → Crear base de datos → Modo producción → us-east1. En Reglas pegá: <code>allow read, write: if request.auth != null;</code></div>
   </div>
-
   <div class="config-step">
-    <div class="step-title"><span class="step-num">4</span> Obtener configuración</div>
-    <div class="step-body">
-      Dentro del proyecto → ícono ⚙️ → <code>Configuración del proyecto</code> → <code>Tus apps</code> → agregar app Web (<code>&lt;/&gt;</code>) → copiá el objeto <code>firebaseConfig</code>.
-    </div>
-  </div>
-
-  <div class="config-step">
-    <div class="step-title"><span class="step-num">5</span> Pegar configuración aquí</div>
-    <div class="step-body" style="margin-bottom:10px">Pegá los valores del <code>firebaseConfig</code>:</div>
-    <input class="fi" id="cfg-apikey" placeholder="apiKey" style="margin-bottom:8px">
-    <input class="fi" id="cfg-authDomain" placeholder="authDomain" style="margin-bottom:8px">
-    <input class="fi" id="cfg-projectId" placeholder="projectId" style="margin-bottom:8px">
-    <input class="fi" id="cfg-appId" placeholder="appId" style="margin-bottom:12px">
-    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="saveConfig()">
-      <i class="ti ti-device-floppy"></i> Guardar y conectar
-    </button>
+    <div class="step-title"><span class="step-num">4</span>Pegar configuración</div>
+    <input id="cfg-apikey" class="fi" placeholder="apiKey" style="margin-bottom:8px">
+    <input id="cfg-authDomain" class="fi" placeholder="authDomain" style="margin-bottom:8px">
+    <input id="cfg-projectId" class="fi" placeholder="projectId" style="margin-bottom:8px">
+    <input id="cfg-appId" class="fi" placeholder="appId" style="margin-bottom:12px">
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="saveConfig()"><i class="ti ti-device-floppy"></i> Guardar y conectar</button>
     <div id="cfg-error" style="font-size:12px;color:#C0392B;margin-top:8px;display:none"></div>
   </div>
 </div>
 
-<!-- APP PRINCIPAL -->
 <div id="app">
   <div class="sync-bar">
     <div class="sync-dot" id="sync-dot"></div>
     <span id="sync-label">Conectado</span>
-    <div class="user-info" onclick="logout()" title="Cerrar sesión">
+    <div class="user-info" onclick="logout()">
       <img id="user-avatar" class="user-avatar" src="" alt="">
       <span style="font-size:11px;color:#AAA"><i class="ti ti-logout" style="font-size:12px"></i></span>
     </div>
   </div>
-
   <div class="tabs">
     <div class="tab on" id="t0" onclick="go(0)"><i class="ti ti-package"></i> Pedidos</div>
     <div class="tab" id="t1" onclick="go(1)"><i class="ti ti-layers-intersect"></i> Lotes</div>
     <div class="tab" id="t2" onclick="go(2)"><i class="ti ti-chart-bar"></i> Resumen</div>
     <div class="tab" id="t3" onclick="go(3)"><i class="ti ti-books"></i> Catálogo</div>
   </div>
-
   <div class="view on" id="v0">
     <button class="btn btn-primary btn-block" onclick="showModal()"><i class="ti ti-plus"></i> Nuevo pedido</button>
     <div id="list-pedidos"></div>
@@ -221,10 +182,35 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1A1A1A;font-
     </div>
     <div id="list-cat"></div>
     <div style="margin-top:18px;padding-top:16px;border-top:1px solid #E0E0DC">
-      <div class="sec" style="margin-top:0">Agregar producto</div>
-      <input id="c-nom" class="fi" placeholder="Nombre (ej: Caja 308 x50)" style="margin-bottom:8px">
-      <input id="c-pie" class="fi" placeholder="Piezas separadas por coma" style="margin-bottom:8px">
-      <input id="c-precio" class="fi" placeholder="Precio (ej: 30000)" style="margin-bottom:10px">
+      <div class="sec" style="margin-top:0">Agregar producto al catálogo</div>
+      <input id="c-nom" class="fi" placeholder="Nombre del producto" style="margin-bottom:8px">
+      <input id="c-precio" class="fi" placeholder="Precio (ej: 30000)" style="margin-bottom:8px">
+      <!-- tipo -->
+      <div style="margin-bottom:10px">
+        <div style="font-size:12px;color:#888;margin-bottom:6px;font-weight:500">Tipo de producto</div>
+        <div style="display:flex;gap:8px">
+          <div class="toggle-check" onclick="toggleNuevoCatTipo('caja')">
+            <div class="box on" id="tipo-caja-box"><i class="ti ti-check" style="font-size:11px"></i></div>
+            <span>Caja municiones</span>
+          </div>
+          <div class="toggle-check" onclick="toggleNuevoCatTipo('otro')">
+            <div class="box" id="tipo-otro-box"></div>
+            <span>Otro</span>
+          </div>
+        </div>
+      </div>
+      <div id="c-piezas-wrap">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <div style="font-size:12px;color:#888;font-weight:500">Piezas</div>
+          <div class="toggle-check" onclick="toggleTienePiezas()">
+            <div class="box on" id="tiene-piezas-box"><i class="ti ti-check" style="font-size:11px"></i></div>
+            <span style="font-size:12px">Tiene piezas</span>
+          </div>
+        </div>
+        <div id="c-pie-wrap">
+          <input id="c-pie" class="fi" placeholder="Piezas separadas por coma" style="margin-bottom:8px">
+        </div>
+      </div>
       <button class="btn btn-sm" style="width:100%;justify-content:center" onclick="addCatalog()"><i class="ti ti-plus"></i> Agregar al catálogo</button>
     </div>
   </div>
@@ -234,12 +220,9 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1A1A1A;font-
 <div id="modal" style="display:none">
   <div class="overlay" onclick="hideModal(event)">
     <div class="sheet" onclick="event.stopPropagation()">
-      <div style="font-size:17px;font-weight:700;margin-bottom:14px;letter-spacing:-.02em">Nuevo pedido</div>
+      <div style="font-size:17px;font-weight:700;margin-bottom:14px">Nuevo pedido</div>
       <div class="sec" style="margin-top:0">Datos</div>
-      <div class="g2" style="margin-bottom:0">
-        <input id="f-num" class="fi" placeholder="N° pedido">
-        <input id="f-cli" class="fi" placeholder="Cliente">
-      </div>
+      <div class="g2"><input id="f-num" class="fi" placeholder="N° pedido"><input id="f-cli" class="fi" placeholder="Cliente"></div>
       <div class="sec" style="margin-top:12px">Productos</div>
       <div id="f-prods"></div>
       <div style="display:flex;gap:8px;margin-bottom:4px;margin-top:4px">
@@ -255,257 +238,252 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1A1A1A;font-
 </div>
 
 <script>
-// ─── FIREBASE CONFIG ───────────────────────────────────────────────────────────
-// Estos valores se cargan desde localStorage (configurados en la pantalla de setup)
-var FB_CONFIG_KEY = 'fbconfig_3d';
-
-function getSavedConfig() {
-  try { return JSON.parse(localStorage.getItem(FB_CONFIG_KEY)); } catch(e) { return null; }
-}
-
-function initFirebase(cfg) {
-  if (firebase.apps.length) return true;
-  try {
-    firebase.initializeApp(cfg);
-    return true;
-  } catch(e) {
-    console.error('Firebase init error', e);
-    return false;
-  }
-}
-
-// ─── CONFIG SCREEN ─────────────────────────────────────────────────────────────
-function showConfig() {
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('config-screen').style.display = 'block';
-  var saved = getSavedConfig();
-  if (saved) {
-    document.getElementById('cfg-apikey').value = saved.apiKey || '';
-    document.getElementById('cfg-authDomain').value = saved.authDomain || '';
-    document.getElementById('cfg-projectId').value = saved.projectId || '';
-    document.getElementById('cfg-appId').value = saved.appId || '';
-  }
-}
-
-function hideConfig() {
-  document.getElementById('config-screen').style.display = 'none';
-  document.getElementById('login-screen').style.display = 'flex';
-}
-
-function saveConfig() {
-  var cfg = {
-    apiKey:       document.getElementById('cfg-apikey').value.trim(),
-    authDomain:   document.getElementById('cfg-authDomain').value.trim(),
-    projectId:    document.getElementById('cfg-projectId').value.trim(),
-    appId:        document.getElementById('cfg-appId').value.trim(),
-    storageBucket: document.getElementById('cfg-authDomain').value.trim().replace('firebaseapp.com','appspot.com'),
-    messagingSenderId: ''
-  };
-  var err = document.getElementById('cfg-error');
-  if (!cfg.apiKey || !cfg.authDomain || !cfg.projectId || !cfg.appId) {
-    err.textContent = 'Completá todos los campos.';
-    err.style.display = 'block';
-    return;
-  }
-  localStorage.setItem(FB_CONFIG_KEY, JSON.stringify(cfg));
-  err.style.display = 'none';
-  if (initFirebase(cfg)) {
-    hideConfig();
-    setupAuth();
-  } else {
-    err.textContent = 'Error al conectar. Verificá los datos.';
-    err.style.display = 'block';
-  }
-}
-
-// ─── AUTH ──────────────────────────────────────────────────────────────────────
-var db, uid_user;
-
-function setupAuth() {
-  firebase.auth().onAuthStateChanged(function(user) {
-    if (user) {
-      uid_user = user.uid;
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('config-screen').style.display = 'none';
-      document.getElementById('app').style.display = 'block';
-      var av = document.getElementById('user-avatar');
-      if (user.photoURL) av.src = user.photoURL;
-      else av.style.display = 'none';
-      db = firebase.firestore();
-      loadData();
-    } else {
-      document.getElementById('app').style.display = 'none';
-      document.getElementById('login-screen').style.display = 'flex';
-    }
-  });
-}
-
-function loginGoogle() {
-  var cfg = getSavedConfig();
-  var errEl = document.getElementById('login-error');
-  if (!cfg) {
-    errEl.textContent = 'Primero configurá Firebase (tocá el enlace de abajo).';
-    errEl.style.display = 'block';
-    return;
-  }
-  if (!initFirebase(cfg)) {
-    errEl.textContent = 'Error al conectar con Firebase. Revisá la configuración.';
-    errEl.style.display = 'block';
-    return;
-  }
-  errEl.style.display = 'none';
-  var provider = new firebase.auth.GoogleAuthProvider();
-  firebase.auth().signInWithPopup(provider).catch(function(e) {
-    errEl.textContent = 'Error al iniciar sesión: ' + e.message;
-    errEl.style.display = 'block';
-  });
-}
-
-function logout() {
-  if (!confirm('¿Cerrar sesión?')) return;
-  firebase.auth().signOut();
-}
-
-// ─── SYNC STATUS ───────────────────────────────────────────────────────────────
-function setSyncing(state) {
-  var dot = document.getElementById('sync-dot');
-  var lbl = document.getElementById('sync-label');
-  if (state === 'syncing') { dot.className='sync-dot syncing'; lbl.textContent='Guardando...'; }
-  else if (state === 'ok')  { dot.className='sync-dot'; lbl.textContent='Sincronizado'; }
-  else                      { dot.className='sync-dot off'; lbl.textContent='Sin conexión'; }
-}
-
-// ─── DATA ──────────────────────────────────────────────────────────────────────
 var PIECES=['Tapa','Base','Traba','Centro'];
 var RAW_CAT=[
-  {id:'c308x10',   name:'Caja 308 x10',          price:15000,  pieces:PIECES,sales:0},
-  {id:'c4570x40',  name:'Caja .45-70 x40',        price:35000,  pieces:PIECES,sales:0},
-  {id:'c300wm40',  name:'Caja .300 Win Mag x40',  price:40000,  pieces:PIECES,sales:0},
-  {id:'c9mmc50',   name:'Caja 9mm compacta x50',  price:18000,  pieces:PIECES,sales:0},
-  {id:'c9mm50',    name:'Caja 9mm x50',           price:22000,  pieces:PIECES,sales:0},
-  {id:'c10mm50',   name:'Caja 10mm x50',          price:22000,  pieces:PIECES,sales:0},
-  {id:'c38s50',    name:'Caja .38 Super x50',     price:22000,  pieces:PIECES,sales:0},
-  {id:'c40sw50',   name:'Caja .40 S&W x50',       price:22000,  pieces:PIECES,sales:0},
-  {id:'c45acp50',  name:'Caja .45 ACP x50',       price:22000,  pieces:PIECES,sales:0},
-  {id:'c380x50',   name:'Caja .380 x50',          price:22000,  pieces:PIECES,sales:0},
-  {id:'c38x50',    name:'Caja .38 x50',           price:25000,  pieces:PIECES,sales:0},
-  {id:'c357x50',   name:'Caja .357 x50',          price:25000,  pieces:PIECES,sales:0},
-  {id:'c44mx50',   name:'Caja .44 Mag x50',       price:25000,  pieces:PIECES,sales:0},
-  {id:'c45cx50',   name:'Caja .45 Colt x50',      price:25000,  pieces:PIECES,sales:0},
-  {id:'c57x50',    name:'Caja 5.7x28 x50',        price:25000,  pieces:PIECES,sales:0},
-  {id:'c454x50',   name:'Caja .454 Casull x50',   price:25000,  pieces:PIECES,sales:0},
-  {id:'c65c50',    name:'Caja 6.5 Creedmoor x50', price:30000,  pieces:PIECES,sales:0},
-  {id:'c762x39x50',name:'Caja 7.62x39 x50',       price:30000,  pieces:PIECES,sales:0},
-  {id:'c762x51x50',name:'Caja 7.62x51 x50',       price:30000,  pieces:PIECES,sales:0},
-  {id:'c22250x50', name:'Caja .22-250 x50',       price:30000,  pieces:PIECES,sales:0},
-  {id:'c65gx50',   name:'Caja 6.5 Grendel x50',   price:30000,  pieces:PIECES,sales:0},
-  {id:'c3030x50',  name:'Caja .30-30 x50',        price:30000,  pieces:PIECES,sales:0},
-  {id:'c243x50',   name:'Caja .243 Win x50',      price:30000,  pieces:PIECES,sales:0},
-  {id:'c300bx50',  name:'Caja .300 BLK x50',      price:30000,  pieces:PIECES,sales:0},
-  {id:'c350lx50',  name:'Caja 350 Legend x50',    price:30000,  pieces:PIECES,sales:0},
-  {id:'c308x50',   name:'Caja .308 x50',          price:30000,  pieces:PIECES,sales:0},
-  {id:'c556x50',   name:'Caja 556 x50',           price:30000,  pieces:PIECES,sales:0},
-  {id:'c6arcx50',  name:'Caja 6mm ARC x50',       price:30000,  pieces:PIECES,sales:0},
-  {id:'c3006x50',  name:'Caja .30-06 x50',        price:35000,  pieces:PIECES,sales:0},
-  {id:'c270x50',   name:'Caja .270 x50',          price:35000,  pieces:PIECES,sales:0},
-  {id:'c300wmx80', name:'Caja .300 Win Mag x80',  price:62500,  pieces:PIECES,sales:0},
-  {id:'c17hmr',    name:'Caja .17 HMR x100',      price:22000,  pieces:PIECES,sales:0},
-  {id:'c22wmr',    name:'Caja .22 WMR x100',      price:22000,  pieces:PIECES,sales:0},
-  {id:'c22lr',     name:'Caja .22 LR x100',       price:22000,  pieces:PIECES,sales:0},
-  {id:'c9mm100',   name:'Caja 9mm x100',          price:35000,  pieces:PIECES,sales:0},
-  {id:'c38s100',   name:'Caja .38 Super x100',    price:35000,  pieces:PIECES,sales:0},
-  {id:'c45acp100', name:'Caja .45 ACP x100',      price:35000,  pieces:PIECES,sales:0},
-  {id:'c10mm100',  name:'Caja 10mm x100',         price:35000,  pieces:PIECES,sales:0},
-  {id:'c40x100',   name:'Caja .40 x100',          price:35000,  pieces:PIECES,sales:0},
-  {id:'c380x100',  name:'Caja .380 x100',         price:35000,  pieces:PIECES,sales:0},
-  {id:'c38sp100',  name:'Caja 38 Special x100',   price:45000,  pieces:PIECES,sales:0},
-  {id:'c357mx100', name:'Caja 357 MAG x100',      price:45000,  pieces:PIECES,sales:0},
-  {id:'c300bx100', name:'Caja 300 Blackout x100', price:50000,  pieces:PIECES,sales:0},
-  {id:'c762x51100',name:'Caja 7.62x51 x100',      price:50000,  pieces:PIECES,sales:0},
-  {id:'c762x39100',name:'Caja 7.62x39 x100',      price:50000,  pieces:PIECES,sales:0},
-  {id:'c223x100',  name:'Caja .223 x100',         price:50000,  pieces:PIECES,sales:0},
-  {id:'c308x100',  name:'Caja .308 x100',         price:50000,  pieces:PIECES,sales:0},
-  {id:'c556x100',  name:'Caja 556 x100',          price:50000,  pieces:PIECES,sales:0},
-  {id:'c243x100',  name:'Caja 243 Win x100',      price:50000,  pieces:PIECES,sales:0},
-  {id:'c3006x100', name:'Caja 30-06 x100',        price:55000,  pieces:PIECES,sales:0},
-  {id:'c270x100',  name:'Caja .270 x100',         price:55000,  pieces:PIECES,sales:0},
+  {id:'c308x10',   name:'Caja 308 x10',          price:15000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c4570x40',  name:'Caja .45-70 x40',        price:35000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c300wm40',  name:'Caja .300 Win Mag x40',  price:40000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c9mmc50',   name:'Caja 9mm compacta x50',  price:18000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c9mm50',    name:'Caja 9mm x50',           price:22000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c10mm50',   name:'Caja 10mm x50',          price:22000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c38s50',    name:'Caja .38 Super x50',     price:22000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c40sw50',   name:'Caja .40 S&W x50',       price:22000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c45acp50',  name:'Caja .45 ACP x50',       price:22000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c380x50',   name:'Caja .380 x50',          price:22000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c38x50',    name:'Caja .38 x50',           price:25000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c357x50',   name:'Caja .357 x50',          price:25000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c44mx50',   name:'Caja .44 Mag x50',       price:25000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c45cx50',   name:'Caja .45 Colt x50',      price:25000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c57x50',    name:'Caja 5.7x28 x50',        price:25000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c454x50',   name:'Caja .454 Casull x50',   price:25000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c65c50',    name:'Caja 6.5 Creedmoor x50', price:30000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c762x39x50',name:'Caja 7.62x39 x50',       price:30000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c762x51x50',name:'Caja 7.62x51 x50',       price:30000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c22250x50', name:'Caja .22-250 x50',       price:30000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c65gx50',   name:'Caja 6.5 Grendel x50',   price:30000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c3030x50',  name:'Caja .30-30 x50',        price:30000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c243x50',   name:'Caja .243 Win x50',      price:30000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c300bx50',  name:'Caja .300 BLK x50',      price:30000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c350lx50',  name:'Caja 350 Legend x50',    price:30000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c308x50',   name:'Caja .308 x50',          price:30000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c556x50',   name:'Caja 556 x50',           price:30000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c6arcx50',  name:'Caja 6mm ARC x50',       price:30000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c3006x50',  name:'Caja .30-06 x50',        price:35000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c270x50',   name:'Caja .270 x50',          price:35000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c300wmx80', name:'Caja .300 Win Mag x80',  price:62500, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c17hmr',    name:'Caja .17 HMR x100',      price:22000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c22wmr',    name:'Caja .22 WMR x100',      price:22000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c22lr',     name:'Caja .22 LR x100',       price:22000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c9mm100',   name:'Caja 9mm x100',          price:35000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c38s100',   name:'Caja .38 Super x100',    price:35000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c45acp100', name:'Caja .45 ACP x100',      price:35000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c10mm100',  name:'Caja 10mm x100',         price:35000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c40x100',   name:'Caja .40 x100',          price:35000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c380x100',  name:'Caja .380 x100',         price:35000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c38sp100',  name:'Caja 38 Special x100',   price:45000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c357mx100', name:'Caja 357 MAG x100',      price:45000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c300bx100', name:'Caja 300 Blackout x100', price:50000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c762x51100',name:'Caja 7.62x51 x100',      price:50000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c762x39100',name:'Caja 7.62x39 x100',      price:50000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c223x100',  name:'Caja .223 x100',         price:50000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c308x100',  name:'Caja .308 x100',         price:50000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c556x100',  name:'Caja 556 x100',          price:50000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c243x100',  name:'Caja 243 Win x100',      price:50000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c3006x100', name:'Caja 30-06 x100',        price:55000, pieces:PIECES,sales:0,tipo:'caja'},
+  {id:'c270x100',  name:'Caja .270 x100',         price:55000, pieces:PIECES,sales:0,tipo:'caja'},
 ];
 
-var cat=[], orders=[], tmp=[], filt='todas', catSort='pop';
+var cat=[],orders=[],tmp=[],filt='todas',catSort='pop';
+var nuevoCatTipo='caja', nuevoCatTienePiezas=true;
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
 function fmt(n){return '$'+n.toLocaleString('es-AR');}
-function popColor(s){return s>=10?'#2ECC71':s>=5?'#378ADD':s>=1?'#F39C12':'#CCCCCC';}
+function popColor(s){return s>=10?'#2ECC71':s>=5?'#378ADD':s>=1?'#F39C12':'#CCC';}
 
 function buildPieces(cp,color,letras,nombre,logo,enT,enB){
+  if(!cp||!cp.length)return[];
   return cp.map(function(n){
     var it=n==='Tapa',ib=n==='Base',g=(it&&enT)||(ib&&enB);
     return{name:n,done:false,color:color,letras:g?letras:'',nombre:g?nombre:'',logo:g?logo:''};
   });
 }
 
-// ─── FIRESTORE ─────────────────────────────────────────────────────────────────
-function userDoc() { return db.collection('users').doc(uid_user); }
+// ── FIREBASE CONFIG ──
+var FB_CONFIG_KEY='fbconfig_3d';
+function getSavedConfig(){try{return JSON.parse(localStorage.getItem(FB_CONFIG_KEY));}catch(e){return null;}}
+function initFirebase(cfg){
+  if(firebase.apps.length)return true;
+  try{firebase.initializeApp(cfg);return true;}catch(e){return false;}
+}
+function showConfig(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('config-screen').style.display='block';
+  var s=getSavedConfig();
+  if(s){
+    document.getElementById('cfg-apikey').value=s.apiKey||'';
+    document.getElementById('cfg-authDomain').value=s.authDomain||'';
+    document.getElementById('cfg-projectId').value=s.projectId||'';
+    document.getElementById('cfg-appId').value=s.appId||'';
+  }
+}
+function hideConfig(){
+  document.getElementById('config-screen').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+}
+function saveConfig(){
+  var cfg={
+    apiKey:document.getElementById('cfg-apikey').value.trim(),
+    authDomain:document.getElementById('cfg-authDomain').value.trim(),
+    projectId:document.getElementById('cfg-projectId').value.trim(),
+    appId:document.getElementById('cfg-appId').value.trim(),
+    storageBucket:'',messagingSenderId:''
+  };
+  var err=document.getElementById('cfg-error');
+  if(!cfg.apiKey||!cfg.authDomain||!cfg.projectId||!cfg.appId){err.textContent='Completá todos los campos.';err.style.display='block';return;}
+  localStorage.setItem(FB_CONFIG_KEY,JSON.stringify(cfg));
+  err.style.display='none';
+  if(initFirebase(cfg)){hideConfig();setupAuth();}
+  else{err.textContent='Error al conectar. Verificá los datos.';err.style.display='block';}
+}
 
-function loadData() {
-  setSyncing('syncing');
-  userDoc().get().then(function(snap) {
-    if (snap.exists) {
-      var d = snap.data();
-      cat    = d.cat    || [];
-      orders = d.orders || [];
-      if (!cat.length) cat = RAW_CAT.map(function(c){return Object.assign({},c);});
+// ── AUTH ──
+var db,uid_user;
+function setupAuth(){
+  firebase.auth().onAuthStateChanged(function(user){
+    if(user){
+      uid_user=user.uid;
+      document.getElementById('login-screen').style.display='none';
+      document.getElementById('config-screen').style.display='none';
+      document.getElementById('app').style.display='block';
+      var av=document.getElementById('user-avatar');
+      if(user.photoURL)av.src=user.photoURL; else av.style.display='none';
+      db=firebase.firestore();
+      loadData();
     } else {
-      cat    = RAW_CAT.map(function(c){return Object.assign({},c);});
-      orders = [{
-        id:'ord96', number:'96', client:'Oscar Torres', createdAt:Date.now(),
+      document.getElementById('app').style.display='none';
+      document.getElementById('login-screen').style.display='flex';
+    }
+  });
+}
+function loginGoogle(){
+  var cfg=getSavedConfig();
+  var errEl=document.getElementById('login-error');
+  if(!cfg){errEl.textContent='Primero configurá Firebase.';errEl.style.display='block';return;}
+  if(!initFirebase(cfg)){errEl.textContent='Error al conectar con Firebase.';errEl.style.display='block';return;}
+  errEl.style.display='none';
+  firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(function(e){
+    errEl.textContent='Error: '+e.message;errEl.style.display='block';
+  });
+}
+function logout(){if(!confirm('¿Cerrar sesión?'))return;firebase.auth().signOut();}
+
+// ── SYNC ──
+function setSyncing(s){
+  var dot=document.getElementById('sync-dot'),lbl=document.getElementById('sync-label');
+  if(s==='syncing'){dot.className='sync-dot syncing';lbl.textContent='Guardando...';}
+  else if(s==='ok'){dot.className='sync-dot';lbl.textContent='Sincronizado';}
+  else{dot.className='sync-dot off';lbl.textContent='Sin conexión';}
+}
+function userDoc(){return db.collection('users').doc(uid_user);}
+function loadData(){
+  setSyncing('syncing');
+  userDoc().get().then(function(snap){
+    if(snap.exists){
+      var d=snap.data();
+      cat=d.cat||[];orders=d.orders||[];
+      if(!cat.length){cat=RAW_CAT.map(function(c){return Object.assign({},c);});}
+      // migrar productos viejos sin tipo
+      cat.forEach(function(c){if(!c.tipo)c.tipo='caja';});
+    } else {
+      cat=RAW_CAT.map(function(c){return Object.assign({},c);});
+      orders=[{
+        id:'ord96',number:'96',client:'Oscar Torres',createdAt:Date.now(),
         products:[
-          {pid:'c3006x50', pname:'Caja .30-06 x50', catPieces:PIECES,
+          {pid:'c3006x50',pname:'Caja .30-06 x50',catPieces:PIECES,tipo:'caja',
            pieces:buildPieces(PIECES,'Anaranjado','Negro','ALBANO','Fusil',true,false)},
-          {pid:'c223x100', pname:'Caja .223 x100',  catPieces:PIECES,
+          {pid:'c223x100',pname:'Caja .223 x100',catPieces:PIECES,tipo:'caja',
            pieces:buildPieces(PIECES,'Verde','Blanco','YONII','Jabalí',true,false)},
-          {pid:'c9mm50',   pname:'Caja 9mm x50',    catPieces:PIECES,
+          {pid:'c9mm50',pname:'Caja 9mm x50',catPieces:PIECES,tipo:'caja',
            pieces:buildPieces(PIECES,'Gris','Negro','SEBASTIAN','Ciervo',true,false)},
         ]
       }];
       saveToCloud();
     }
-    setSyncing('ok');
-    render();
-  }).catch(function(e){
-    console.error(e);
-    setSyncing('off');
-  });
-
-  // Escuchar cambios en tiempo real
-  userDoc().onSnapshot(function(snap) {
-    if (!snap.exists) return;
-    var d = snap.data();
-    cat    = d.cat    || cat;
-    orders = d.orders || orders;
-    setSyncing('ok');
-    render();
-  }, function(e){ setSyncing('off'); });
+    setSyncing('ok');render();
+  }).catch(function(e){console.error(e);setSyncing('off');});
+  userDoc().onSnapshot(function(snap){
+    if(!snap.exists)return;
+    var d=snap.data();
+    cat=d.cat||cat;orders=d.orders||orders;
+    cat.forEach(function(c){if(!c.tipo)c.tipo='caja';});
+    setSyncing('ok');render();
+  },function(){setSyncing('off');});
 }
-
-function saveToCloud() {
+function saveToCloud(){
   setSyncing('syncing');
-  userDoc().set({ cat: cat, orders: orders }, { merge: true })
-    .then(function(){ setSyncing('ok'); })
-    .catch(function(e){ console.error(e); setSyncing('off'); });
+  userDoc().set({cat:cat,orders:orders},{merge:true})
+    .then(function(){setSyncing('ok');})
+    .catch(function(e){console.error(e);setSyncing('off');});
 }
 
-// ─── UI ────────────────────────────────────────────────────────────────────────
+// ── UI ──
 function go(i){
   document.querySelectorAll('.tab').forEach(function(t,j){t.classList.toggle('on',i===j);});
   document.querySelectorAll('.view').forEach(function(v,j){v.classList.toggle('on',i===j);});
 }
 
+// ── CATÁLOGO FORM ──
+function toggleNuevoCatTipo(t){
+  nuevoCatTipo=t;
+  document.getElementById('tipo-caja-box').className='box'+(t==='caja'?' on':'');
+  document.getElementById('tipo-caja-box').innerHTML=t==='caja'?'<i class="ti ti-check" style="font-size:11px"></i>':'';
+  document.getElementById('tipo-otro-box').className='box'+(t==='otro'?' on':'');
+  document.getElementById('tipo-otro-box').innerHTML=t==='otro'?'<i class="ti ti-check" style="font-size:11px"></i>':'';
+  // si es caja siempre tiene piezas
+  if(t==='caja'){
+    nuevoCatTienePiezas=true;
+    document.getElementById('tiene-piezas-box').className='box on';
+    document.getElementById('tiene-piezas-box').innerHTML='<i class="ti ti-check" style="font-size:11px"></i>';
+    document.getElementById('c-pie-wrap').style.display='block';
+    document.getElementById('c-pie').value='Tapa,Base,Traba,Centro';
+  } else {
+    document.getElementById('c-pie-wrap').style.display=nuevoCatTienePiezas?'block':'none';
+    document.getElementById('c-pie').value='';
+  }
+}
+function toggleTienePiezas(){
+  if(nuevoCatTipo==='caja')return; // cajas siempre tienen piezas
+  nuevoCatTienePiezas=!nuevoCatTienePiezas;
+  var box=document.getElementById('tiene-piezas-box');
+  box.className='box'+(nuevoCatTienePiezas?' on':'');
+  box.innerHTML=nuevoCatTienePiezas?'<i class="ti ti-check" style="font-size:11px"></i>':'';
+  document.getElementById('c-pie-wrap').style.display=nuevoCatTienePiezas?'block':'none';
+}
+
+function addCatalog(){
+  var nom=document.getElementById('c-nom').value.trim();
+  var pr=parseInt(document.getElementById('c-precio').value)||0;
+  if(!nom){alert('Ingresá el nombre del producto.');return;}
+  var pieces=[];
+  if(nuevoCatTienePiezas){
+    var raw=document.getElementById('c-pie').value.trim();
+    if(!raw){alert('Ingresá las piezas o desactivá "Tiene piezas".');return;}
+    pieces=raw.split(',').map(function(s){return s.trim();}).filter(Boolean);
+  }
+  cat.push({id:uid(),name:nom,pieces:pieces,price:pr,sales:0,tipo:nuevoCatTipo});
+  saveToCloud();renderCatalog();
+  document.getElementById('c-nom').value='';
+  document.getElementById('c-precio').value='';
+  document.getElementById('c-pie').value='';
+  alert('"'+nom+'" agregado al catálogo.');
+}
+
+// ── MODAL PEDIDO ──
 function showModal(){
   tmp=[];
   document.getElementById('f-num').value='';
   document.getElementById('f-cli').value='';
-  refreshSel(); refreshProds();
+  refreshSel();refreshProds();
   document.getElementById('modal').style.display='block';
 }
 function closeModal(){document.getElementById('modal').style.display='none';}
@@ -513,12 +491,28 @@ function hideModal(e){if(e.target.classList.contains('overlay'))closeModal();}
 
 function refreshSel(){
   var sorted=cat.slice().sort(function(a,b){return(b.sales||0)-(a.sales||0);});
+  // separar cajas y otros
+  var cajas=sorted.filter(function(p){return p.tipo==='caja';});
+  var otros=sorted.filter(function(p){return p.tipo!=='caja';});
   var s=document.getElementById('f-sel');
-  s.innerHTML='<option value="">— elegí un producto —</option>'+
-    sorted.map(function(p){
+  var html='<option value="">— elegí un producto —</option>';
+  if(cajas.length){
+    html+='<optgroup label="📦 Cajas de municiones">';
+    html+=cajas.map(function(p){
       var ico=p.sales>=10?'🔥 ':p.sales>=5?'⭐ ':p.sales>=1?'· ':'';
       return'<option value="'+p.id+'">'+ico+p.name+' — '+fmt(p.price)+'</option>';
     }).join('');
+    html+='</optgroup>';
+  }
+  if(otros.length){
+    html+='<optgroup label="🔧 Otros productos">';
+    html+=otros.map(function(p){
+      var ico=p.sales>=10?'🔥 ':p.sales>=5?'⭐ ':p.sales>=1?'· ':'';
+      return'<option value="'+p.id+'">'+ico+p.name+' — '+fmt(p.price)+'</option>';
+    }).join('');
+    html+='</optgroup>';
+  }
+  s.innerHTML=html;
 }
 
 function addProd(){
@@ -526,11 +520,13 @@ function addProd(){
   if(!id)return;
   var p=cat.find(function(c){return c.id===id;});
   if(!p)return;
-  tmp.push({pid:p.id,pname:p.name,catPieces:p.pieces,color:'',letras:'',nombre:'',logo:'',enTapa:true,enBase:false});
+  var hasPieces=p.pieces&&p.pieces.length>0;
+  tmp.push({pid:p.id,pname:p.name,catPieces:p.pieces||[],tipo:p.tipo||'caja',
+    hasPieces:hasPieces,color:'',letras:'',nombre:'',logo:'',enTapa:true,enBase:false,
+    nota:''});
   refreshProds();
   document.getElementById('f-sel').value='';
 }
-
 function removeTP(i){tmp.splice(i,1);refreshProds();}
 function toggleDest(i,f){tmp[i][f]=!tmp[i][f];refreshProds();}
 
@@ -538,11 +534,8 @@ function refreshProds(){
   var el=document.getElementById('f-prods');
   if(!tmp.length){el.innerHTML='<p style="font-size:13px;color:#AAA;margin-bottom:8px">Ningún producto agregado.</p>';return;}
   el.innerHTML=tmp.map(function(p,i){
-    return'<div class="prod-block">'+
-      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'+
-        '<span style="font-size:14px;font-weight:600">'+p.pname+'</span>'+
-        '<span style="cursor:pointer;color:#AAA;padding:2px 5px;font-size:16px" onclick="removeTP('+i+')"><i class="ti ti-x"></i></span>'+
-      '</div>'+
+    var isCaja=p.tipo==='caja';
+    var detalle=isCaja?
       '<div class="g2" style="margin-bottom:8px">'+
         '<input class="fi" placeholder="Color caja" oninput="tmp['+i+'].color=this.value" value="'+p.color+'">'+
         '<input class="fi" placeholder="Color letras" oninput="tmp['+i+'].letras=this.value" value="'+p.letras+'">'+
@@ -554,27 +547,21 @@ function refreshProds(){
       '<div style="font-size:10px;font-weight:700;color:#999;letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px">Grabado en</div>'+
       '<div class="piece-dest">'+
         '<div class="toggle-check" onclick="toggleDest('+i+',\'enTapa\')">'+
-          '<div class="box'+(p.enTapa?' on':'')+'">'+(p.enTapa?'<i class="ti ti-check" style="font-size:11px"></i>':'')+'</div>'+
-          '<span>Tapa</span></div>'+
+          '<div class="box'+(p.enTapa?' on':'')+'">'+(p.enTapa?'<i class="ti ti-check" style="font-size:11px"></i>':'')+'</div><span>Tapa</span></div>'+
         '<div class="toggle-check" onclick="toggleDest('+i+',\'enBase\')">'+
-          '<div class="box'+(p.enBase?' on':'')+'">'+(p.enBase?'<i class="ti ti-check" style="font-size:11px"></i>':'')+'</div>'+
-          '<span>Base</span></div>'+
-      '</div></div>';
+          '<div class="box'+(p.enBase?' on':'')+'">'+(p.enBase?'<i class="ti ti-check" style="font-size:11px"></i>':'')+'</div><span>Base</span></div>'+
+      '</div>'
+      :
+      '<input class="fi" placeholder="Nota / descripción (opcional)" oninput="tmp['+i+'].nota=this.value" value="'+p.nota+'">';
+    return'<div class="prod-block">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'+
+        '<div>'+
+          '<span style="font-size:14px;font-weight:600">'+p.pname+'</span> '+
+          '<span class="type-badge '+(isCaja?'type-caja':'type-otro')+'">'+(isCaja?'Caja':'Otro')+'</span>'+
+        '</div>'+
+        '<span style="cursor:pointer;color:#AAA;padding:2px 5px;font-size:16px" onclick="removeTP('+i+')"><i class="ti ti-x"></i></span>'+
+      '</div>'+detalle+'</div>';
   }).join('');
-}
-
-function addCatalog(){
-  var nom=document.getElementById('c-nom').value.trim();
-  var pie=document.getElementById('c-pie').value.trim();
-  var pr=parseInt(document.getElementById('c-precio').value)||0;
-  if(!nom||!pie){alert('Completá nombre y piezas.');return;}
-  var pieces=pie.split(',').map(function(s){return s.trim();}).filter(Boolean);
-  cat.push({id:uid(),name:nom,pieces:pieces,price:pr,sales:0});
-  saveToCloud(); renderCatalog();
-  document.getElementById('c-nom').value='';
-  document.getElementById('c-pie').value='';
-  document.getElementById('c-precio').value='';
-  alert('"'+nom+'" agregado al catálogo.');
 }
 
 function guardar(){
@@ -583,36 +570,47 @@ function guardar(){
   if(!cli){alert('Escribí el nombre del cliente.');return;}
   if(!tmp.length){alert('Agregá al menos un producto.');return;}
   var prods=tmp.map(function(p){
-    return{pid:p.pid,pname:p.pname,catPieces:p.catPieces,
-      pieces:buildPieces(p.catPieces,p.color,p.letras,p.nombre,p.logo,p.enTapa,p.enBase)};
+    var pieces=p.hasPieces?buildPieces(p.catPieces,p.color,p.letras,p.nombre,p.logo,p.enTapa,p.enBase):[];
+    return{pid:p.pid,pname:p.pname,catPieces:p.catPieces,tipo:p.tipo||'caja',
+      hasPieces:p.hasPieces,nota:p.nota||'',pieces:pieces};
   });
   tmp.forEach(function(p){var c=cat.find(function(c){return c.id===p.pid;});if(c)c.sales=(c.sales||0)+1;});
   orders.unshift({id:uid(),number:num,client:cli,createdAt:Date.now(),products:prods});
-  saveToCloud(); closeModal(); render();
+  saveToCloud();closeModal();render();
 }
 
 function toggle(oid,pi,pci){
   var o=orders.find(function(x){return x.id===oid;});
   if(!o)return;
   o.products[pi].pieces[pci].done=!o.products[pi].pieces[pci].done;
-  saveToCloud(); render();
+  saveToCloud();render();
+}
+function toggleItem(oid,pi){
+  var o=orders.find(function(x){return x.id===oid;});
+  if(!o)return;
+  o.products[pi].done=!o.products[pi].done;
+  saveToCloud();render();
 }
 
 function delOrder(id){
   if(!confirm('¿Eliminar este pedido?'))return;
   orders=orders.filter(function(o){return o.id!==id;});
-  saveToCloud(); render();
+  saveToCloud();render();
 }
 
 function progress(o){
   var t=0,d=0;
-  o.products.forEach(function(p){t+=p.pieces.length;d+=p.pieces.filter(function(pc){return pc.done;}).length;});
+  o.products.forEach(function(p){
+    if(p.hasPieces&&p.pieces&&p.pieces.length){
+      t+=p.pieces.length;d+=p.pieces.filter(function(pc){return pc.done;}).length;
+    } else {
+      t+=1;d+=(p.done?1:0);
+    }
+  });
   return{t:t,d:d};
 }
-
 function bc(d,t){return d===0?'bp':d===t&&t>0?'bd':'bx';}
 function bt(d,t){return d===0?'Pendiente':d===t&&t>0?'Completo':d+'/'+t;}
-
 function tags(pc){
   var out=[];
   if(pc.color)out.push('<span class="tag">'+pc.color+'</span>');
@@ -630,23 +628,37 @@ function renderPedidos(){
   el.innerHTML=orders.map(function(o){
     var p=progress(o),pct=p.t?Math.round(p.d/p.t*100):0;
     var prods=o.products.map(function(pr,pi){
-      var pdone=pr.pieces.filter(function(pc){return pc.done;}).length;
-      return'<div style="margin-top:11px">'+
-        '<div class="prod-title">'+pr.pname+' ('+pdone+'/'+pr.pieces.length+')</div>'+
-        pr.pieces.map(function(pc,pci){
-          return'<div class="row">'+
-            '<div class="chk'+(pc.done?' on':'')+'" onclick="toggle(\''+o.id+'\','+pi+','+pci+')">'+
-              (pc.done?'<i class="ti ti-check" style="font-size:12px"></i>':'')+
-            '</div>'+
-            '<div style="flex:1"><div class="pname'+(pc.done?' done':'')+'">'+pc.name+'</div>'+(!pc.done?tags(pc):'')+
-            '</div></div>';
-        }).join('')+'</div>';
+      var isCaja=pr.tipo==='caja';
+      if(pr.hasPieces&&pr.pieces&&pr.pieces.length){
+        var pdone=pr.pieces.filter(function(pc){return pc.done;}).length;
+        return'<div style="margin-top:11px">'+
+          '<div class="prod-title">'+pr.pname+' ('+pdone+'/'+pr.pieces.length+')</div>'+
+          pr.pieces.map(function(pc,pci){
+            return'<div class="row">'+
+              '<div class="chk'+(pc.done?' on':'')+'" onclick="toggle(\''+o.id+'\','+pi+','+pci+')">'+
+                (pc.done?'<i class="ti ti-check" style="font-size:12px"></i>':'')+
+              '</div>'+
+              '<div style="flex:1"><div class="pname'+(pc.done?' done':'')+'">'+pc.name+'</div>'+(!pc.done?tags(pc):'')+
+              '</div></div>';
+          }).join('')+'</div>';
+      } else {
+        // item simple
+        return'<div class="row" style="margin-top:6px">'+
+          '<div class="chk'+(pr.done?' on':'')+'" onclick="toggleItem(\''+o.id+'\','+pi+')">'+
+            (pr.done?'<i class="ti ti-check" style="font-size:12px"></i>':'')+
+          '</div>'+
+          '<div style="flex:1">'+
+            '<div class="pname'+(pr.done?' done':'')+'">'+pr.pname+'</div>'+
+            (pr.nota?'<div style="font-size:12px;color:#888;margin-top:2px">'+pr.nota+'</div>':'')+
+            '<span class="type-badge type-otro" style="margin-top:4px;display:inline-block">Otro</span>'+
+          '</div></div>';
+      }
     }).join('');
     return'<div class="card">'+
       '<div class="header-bar">'+
         '<div>'+
           '<div class="order-name">'+o.client+(o.number?' <span class="order-num">#'+o.number+'</span>':'')+'</div>'+
-          '<div class="order-sub">'+o.products.length+' producto'+(o.products.length!==1?'s':'')+' · '+p.t+' piezas</div>'+
+          '<div class="order-sub">'+o.products.length+' producto'+(o.products.length!==1?'s':'')+' · '+p.t+' unid.</div>'+
         '</div>'+
         '<span class="badge '+bc(p.d,p.t)+'">'+bt(p.d,p.t)+'</span>'+
       '</div>'+
@@ -669,10 +681,16 @@ function renderLotes(){
   var map={};
   orders.forEach(function(o){
     o.products.forEach(function(p,pi){
-      p.pieces.forEach(function(pc,pci){
-        if(!map[pc.name])map[pc.name]=[];
-        map[pc.name].push({oid:o.id,client:o.client,num:o.number,pname:p.pname,pi:pi,pci:pci,pc:pc});
-      });
+      if(p.hasPieces&&p.pieces&&p.pieces.length){
+        p.pieces.forEach(function(pc,pci){
+          if(!map[pc.name])map[pc.name]=[];
+          map[pc.name].push({oid:o.id,client:o.client,num:o.number,pname:p.pname,pi:pi,pci:pci,pc:pc,tipo:'pieza'});
+        });
+      } else {
+        var key='Otros items';
+        if(!map[key])map[key]=[];
+        map[key].push({oid:o.id,client:o.client,num:o.number,pname:p.pname,pi:pi,pci:-1,pc:{done:p.done||false,color:'',letras:'',nombre:'',logo:''},tipo:'item',nota:p.nota||''});
+      }
     });
   });
   var types=Object.keys(map).sort();
@@ -691,17 +709,20 @@ function renderLotes(){
       '</div>'+
       (pend.length?'<div style="font-size:11px;font-weight:700;color:#AAA;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em">Pendientes ('+pend.length+')</div>'+
         pend.map(function(i){
+          var onclick=i.tipo==='item'?'toggleItem(\''+i.oid+'\','+i.pi+')':'toggle(\''+i.oid+'\','+i.pi+','+i.pci+')';
           return'<div class="row">'+
-            '<div class="chk" onclick="toggle(\''+i.oid+'\','+i.pi+','+i.pci+')" style="margin-top:2px;flex-shrink:0"></div>'+
+            '<div class="chk" onclick="'+onclick+'" style="margin-top:2px;flex-shrink:0"></div>'+
             '<div style="flex:1">'+
               '<div style="font-size:14px;font-weight:600">'+i.client+(i.num?' <span style="font-size:11px;color:#AAA;font-weight:400">#'+i.num+'</span>':'')+'</div>'+
-              '<div style="font-size:12px;color:#999">'+i.pname+'</div>'+tags(i.pc)+
+              '<div style="font-size:12px;color:#999">'+i.pname+(i.nota?' · '+i.nota:'')+'</div>'+
+              tags(i.pc)+
             '</div></div>';
         }).join(''):'')  +
       (done.length?'<div style="font-size:11px;font-weight:700;color:#AAA;margin:9px 0 6px;text-transform:uppercase;letter-spacing:.04em">Listas ('+done.length+')</div>'+
         done.map(function(i){
+          var onclick=i.tipo==='item'?'toggleItem(\''+i.oid+'\','+i.pi+')':'toggle(\''+i.oid+'\','+i.pi+','+i.pci+')';
           return'<div class="row" style="opacity:.35">'+
-            '<div class="chk on" onclick="toggle(\''+i.oid+'\','+i.pi+','+i.pci+')" style="flex-shrink:0"><i class="ti ti-check" style="font-size:12px"></i></div>'+
+            '<div class="chk on" onclick="'+onclick+'" style="flex-shrink:0"><i class="ti ti-check" style="font-size:12px"></i></div>'+
             '<div><div style="font-size:14px;text-decoration:line-through">'+i.client+' — '+i.pname+'</div></div></div>';
         }).join(''):'')  +
     '</div>';
@@ -716,7 +737,7 @@ function renderResumen(){
   document.getElementById('stats').innerHTML=
     '<div class="stat"><div class="stat-l">Pedidos</div><div class="stat-v">'+orders.length+'</div></div>'+
     '<div class="stat"><div class="stat-l">Completos</div><div class="stat-v">'+comp+'</div></div>'+
-    '<div class="stat"><div class="stat-l">Piezas totales</div><div class="stat-v">'+t+'</div></div>'+
+    '<div class="stat"><div class="stat-l">Unidades totales</div><div class="stat-v">'+t+'</div></div>'+
     '<div class="stat"><div class="stat-l">Progreso</div><div class="stat-v">'+pct+'%</div></div>';
   document.getElementById('list-resumen').innerHTML=
     '<div class="sec">Estado por pedido</div>'+
@@ -728,7 +749,7 @@ function renderResumen(){
           '<span class="badge '+bc(p.d,p.t)+'">'+bt(p.d,p.t)+'</span>'+
         '</div>'+
         '<div class="pbar"><div class="pfill" style="width:'+pct2+'%"></div></div>'+
-        '<div style="font-size:12px;color:#AAA">'+p.d+'/'+p.t+' piezas · '+pct2+'%</div></div>';
+        '<div style="font-size:12px;color:#AAA">'+p.d+'/'+p.t+' · '+pct2+'%</div></div>';
     }).join(''):'<div class="empty" style="padding:20px 0">Sin pedidos.</div>');
 }
 
@@ -738,25 +759,57 @@ function setCatSort(s){
   renderCatalog();
 }
 
+var folderCajaOpen=false;
+function toggleFolderCaja(){
+  folderCajaOpen=!folderCajaOpen;
+  var body=document.getElementById('folder-caja-body');
+  var icon=document.getElementById('folder-caja-icon');
+  body.className='folder-body'+(folderCajaOpen?' open':'');
+  icon.className='ti ti-chevron-'+(folderCajaOpen?'up':'down');
+}
+
 function renderCatalog(){
   var el=document.getElementById('list-cat');
-  var sorted=cat.slice();
-  if(catSort==='pop')sorted.sort(function(a,b){return(b.sales||0)-(a.sales||0);});
-  else if(catSort==='az')sorted.sort(function(a,b){return a.name.localeCompare(b.name);});
-  else sorted.sort(function(a,b){return(a.price||0)-(b.price||0);});
-  if(catSort==='pop'){
-    var groups=[
-      {label:'🔥 Más vendidos (10+)',items:sorted.filter(function(c){return(c.sales||0)>=10;})},
-      {label:'⭐ Frecuentes (5–9)',  items:sorted.filter(function(c){return(c.sales||0)>=5&&(c.sales||0)<10;})},
-      {label:'· Ocasionales (1–4)', items:sorted.filter(function(c){return(c.sales||0)>=1&&(c.sales||0)<5;})},
-      {label:'Sin ventas aún',      items:sorted.filter(function(c){return!(c.sales||0);})},
-    ].filter(function(g){return g.items.length;});
-    el.innerHTML='<div class="card">'+groups.map(function(g){
-      return'<div class="group-label">'+g.label+'</div>'+g.items.map(catRow).join('');
-    }).join('')+'</div>';
-  } else {
-    el.innerHTML='<div class="card">'+sorted.map(catRow).join('')+'</div>';
+  var cajas=cat.filter(function(c){return c.tipo==='caja';});
+  var otros=cat.filter(function(c){return c.tipo!=='caja';});
+
+  // ordenar
+  function sortItems(arr){
+    var s=arr.slice();
+    if(catSort==='pop')s.sort(function(a,b){return(b.sales||0)-(a.sales||0);});
+    else if(catSort==='az')s.sort(function(a,b){return a.name.localeCompare(b.name);});
+    else s.sort(function(a,b){return(a.price||0)-(b.price||0);});
+    return s;
   }
+
+  var sortedCajas=sortItems(cajas);
+  var sortedOtros=sortItems(otros);
+
+  // cajas: carpeta colapsable, por defecto muestra top 5 más vendidas
+  var topCajas=sortedCajas.filter(function(c){return(c.sales||0)>0;}).slice(0,5);
+  var allCajasHTML=sortedCajas.map(catRow).join('');
+  var topCajasHTML=topCajas.length?topCajas.map(catRow).join('')+
+    '<div style="font-size:12px;color:#AAA;padding:8px 0 2px;text-align:center">'+
+    (sortedCajas.length-topCajas.length)+' más — expandí para ver todas</div>':
+    '<div style="font-size:13px;color:#AAA;padding:8px 0">Aún no hay cajas con ventas. Expandí para ver el catálogo completo.</div>';
+
+  var cajasSection='<div class="folder">'+
+    '<div class="folder-header" onclick="toggleFolderCaja()">'+
+      '<div class="folder-title"><i class="ti ti-folder" style="color:#F39C12"></i> Cajas de municiones <span style="font-size:12px;color:#AAA;font-weight:400">('+sortedCajas.length+')</span></div>'+
+      '<i class="ti ti-chevron-'+(folderCajaOpen?'up':'down')+'" id="folder-caja-icon"></i>'+
+    '</div>'+
+    '<div style="padding:0 16px 12px;background:#fff;border-top:1px solid #F0F0EC">'+topCajasHTML+'</div>'+
+    '<div class="folder-body'+(folderCajaOpen?' open':'')+'" id="folder-caja-body">'+
+      '<div style="font-size:10px;font-weight:700;color:#999;letter-spacing:.06em;text-transform:uppercase;padding:10px 0 6px;border-top:1px solid #F0F0EC">Catálogo completo</div>'+
+      allCajasHTML+
+    '</div>'+
+  '</div>';
+
+  var otrosSection=sortedOtros.length?
+    '<div class="sec">Otros productos</div>'+
+    '<div class="card">'+sortedOtros.map(catRow).join('')+'</div>':'';
+
+  el.innerHTML=cajasSection+otrosSection;
 }
 
 function catRow(c){
@@ -768,14 +821,13 @@ function catRow(c){
     '</div></div>';
 }
 
-// ─── INICIO ────────────────────────────────────────────────────────────────────
+// ── INICIO ──
 (function init(){
-  var cfg = getSavedConfig();
-  if (cfg && initFirebase(cfg)) {
-    setupAuth();
-  } else {
-    document.getElementById('login-screen').style.display = 'flex';
-  }
+  var cfg=getSavedConfig();
+  if(cfg&&initFirebase(cfg)){setupAuth();}
+  else{document.getElementById('login-screen').style.display='flex';}
+  // init form catálogo
+  document.getElementById('c-pie').value='Tapa,Base,Traba,Centro';
 })();
 </script>
 </body>
