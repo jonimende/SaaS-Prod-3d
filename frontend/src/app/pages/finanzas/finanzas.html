@@ -1,0 +1,126 @@
+<div class="flex flex-col gap-6">
+
+  <!-- Header Section -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div class="flex items-center gap-2.5">
+      <i class="ti ti-report-money text-2xl text-black"></i>
+      <h2 class="text-xl font-bold tracking-tight text-black">Panel Financiero</h2>
+    </div>
+    
+    <button 
+      (click)="loadFinancialSummary()"
+      [disabled]="isLoading()"
+      class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-white border border-gray-250 hover:bg-gray-50 text-gray-700 rounded-xl font-bold text-xs shadow-sm transition active:scale-[0.98] cursor-pointer">
+      <i class="ti ti-refresh text-sm" [class.animate-spin]="isLoading()"></i>
+      Actualizar
+    </button>
+  </div>
+
+  <!-- Messages / Alerts -->
+  @if (errorMessage()) {
+    <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-xs text-red-600 font-semibold flex items-center gap-2">
+      <i class="ti ti-alert-circle text-base"></i>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="flex justify-center items-center py-20">
+      <span class="animate-spin inline-block w-8 h-8 border-4 border-black border-t-transparent rounded-full"></span>
+    </div>
+  } @else {
+    <!-- Financial Metrics Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      
+      <!-- Gross Revenue Card (Emerald/Green) -->
+      <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between min-h-[160px] relative overflow-hidden">
+        <div class="absolute top-0 left-0 right-0 h-1.5 bg-emerald-500"></div>
+        <div class="flex justify-between items-start">
+          <div>
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">Ingresos Brutos</span>
+            <span class="text-xs text-gray-500 font-medium">Pedidos 100% completados</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-emerald-50 text-emerald-600">
+            <i class="ti ti-trending-up text-xl"></i>
+          </div>
+        </div>
+        <div class="mt-4">
+          <h3 class="text-3xl font-black text-emerald-600 tracking-tight font-mono">
+            {{ summary().totalRevenue | currency:'ARS':'symbol-narrow':'1.0-0' }}
+          </h3>
+        </div>
+      </div>
+
+      <!-- Operational Costs Card (Rose/Red) -->
+      <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between min-h-[160px] relative overflow-hidden">
+        <div class="absolute top-0 left-0 right-0 h-1.5 bg-rose-500"></div>
+        <div class="flex justify-between items-start">
+          <div>
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">Costos de Producción</span>
+            <span class="text-xs text-gray-500 font-medium">Costo base de insumos/error</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-rose-50 text-rose-600">
+            <i class="ti ti-trending-down text-xl"></i>
+          </div>
+        </div>
+        <div class="mt-4">
+          <h3 class="text-3xl font-black text-rose-600 tracking-tight font-mono">
+            {{ summary().totalCost | currency:'ARS':'symbol-narrow':'1.0-0' }}
+          </h3>
+        </div>
+      </div>
+
+      <!-- Net Profit Card (Sleek Dark Theme) -->
+      <div class="bg-black border border-gray-900 rounded-2xl p-6 shadow-md flex flex-col justify-between min-h-[160px] relative overflow-hidden">
+        <div class="absolute top-0 left-0 right-0 h-1.5 bg-sky-500"></div>
+        <div class="flex justify-between items-start">
+          <div>
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">Ganancia Neta</span>
+            <span class="text-xs text-gray-300 font-medium">Margen neto de retorno</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-gray-800 text-sky-400">
+            <i class="ti ti-wallet text-xl"></i>
+          </div>
+        </div>
+        <div class="mt-4">
+          <h3 class="text-3xl font-black text-sky-400 tracking-tight font-mono">
+            {{ summary().netProfit | currency:'ARS':'symbol-narrow':'1.0-0' }}
+          </h3>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Explanatory Information Card -->
+    <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm mt-2">
+      <h3 class="text-sm font-bold uppercase tracking-wider text-gray-600 mb-3 flex items-center gap-1.5">
+        <i class="ti ti-info-circle text-base text-gray-500"></i>
+        Cómo se calculan estos números
+      </h3>
+      <div class="text-xs text-gray-500 flex flex-col gap-2.5 leading-relaxed">
+        <p>
+          El <strong>Panel Financiero</strong> evalúa en tiempo real las finanzas de tu taller basándose exclusivamente en los <strong>pedidos completados</strong>.
+        </p>
+        <ul class="list-disc pl-5 flex flex-col gap-1.5">
+          <li>
+            <strong class="text-gray-700">Ingresos Brutos:</strong> Corresponde a la suma de los precios de venta de todos los productos y piezas impresas incluidos en los pedidos marcados como finalizados (donde el 100% de las piezas componentes están marcadas como "Listas").
+          </li>
+          <li>
+            <strong class="text-gray-700">Costos de Producción:</strong> Es la sumatoria del costo unitario asignado a cada producto en el catálogo. Este costo contempla el filamento utilizado, consumo eléctrico del taller y desgaste amortizado de las máquinas.
+          </li>
+          <li>
+            <strong class="text-gray-700">Ganancia Neta:</strong> La diferencia directa entre tus ingresos totales por pedidos entregados y los costos incurridos en su manufactura.
+          </li>
+        </ul>
+        <div class="mt-2 p-3 bg-[#F7F7F5] rounded-xl border border-gray-150 flex items-start gap-2">
+          <i class="ti ti-bulb text-sm text-amber-600 mt-0.5"></i>
+          <p class="text-[11px] text-gray-500">
+            <strong>Consejo Operativo:</strong> Recuerda usar el <strong>Calculador de Costos Inteligente</strong> al cotizar tus trabajos para automatizar el cálculo del costo unitario e importarlo directamente al catálogo. Esto mantendrá este panel financiero preciso y actualizado.
+          </p>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

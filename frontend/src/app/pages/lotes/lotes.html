@@ -1,0 +1,165 @@
+<div class="flex flex-col gap-6">
+
+  <!-- Header Section -->
+  <div class="flex justify-between items-center">
+    <h2 class="text-xl font-bold tracking-tight">Lotes de Producción</h2>
+  </div>
+
+  <!-- Loading Indicator -->
+  @if (isLoading() && orders().length === 0) {
+    <div class="flex justify-center items-center py-12">
+      <span class="animate-spin inline-block w-8 h-8 border-4 border-black border-t-transparent rounded-full"></span>
+    </div>
+  }
+
+  @if (orders().length === 0 && !isLoading()) {
+    <div class="border border-dashed border-gray-300 rounded-2xl p-12 text-center text-gray-400 bg-white shadow-sm">
+      <i class="ti ti-layers-intersect text-4xl mb-2 block"></i>
+      <p class="text-sm font-medium">Carga pedidos para empezar a ver los lotes de producción.</p>
+    </div>
+  } @else {
+    <!-- Sliding Horizontal Filter Bar (Mobile Touch Friendly) -->
+    <div class="flex gap-2 overflow-x-auto pb-3 -mx-4 px-4 scrollbar-hide md:mx-0 md:px-0">
+      @for (f of filters(); track f) {
+        <button 
+          (click)="setFilter(f)"
+          class="flex-shrink-0 px-4 py-2 border rounded-full text-xs font-semibold tracking-wide transition cursor-pointer border-solid uppercase"
+          [class.bg-[#1A1A1A]]="activeFilter() === f"
+          [class.text-white]="activeFilter() === f"
+          [class.border-[#1A1A1A]]="activeFilter() === f"
+          [class.bg-white]="activeFilter() !== f"
+          [class.text-gray-500]="activeFilter() !== f"
+          [class.border-gray-200]="activeFilter() !== f"
+          [class.hover:bg-gray-50]="activeFilter() !== f">
+          {{ f === 'todas' ? 'Todas' : f }}
+        </button>
+      }
+    </div>
+
+    <!-- Groups Container -->
+    <div class="flex flex-col gap-6">
+      @for (group of filteredGroups(); track group.name) {
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+          
+          <!-- Group Card Header -->
+          <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-3">
+            <span class="font-bold text-base text-gray-800">{{ group.name }}</span>
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase"
+                  [class.bg-green-50]="getCompletedCount(group.items) === group.items.length"
+                  [class.text-green-700]="getCompletedCount(group.items) === group.items.length"
+                  [class.bg-blue-50]="getCompletedCount(group.items) < group.items.length"
+                  [class.text-blue-700]="getCompletedCount(group.items) < group.items.length">
+              {{ getCompletedCount(group.items) }}/{{ group.items.length }}
+            </span>
+          </div>
+
+          <!-- Pending list in this lot group -->
+          @let pendingItems = group.items.filter(i => !i.done);
+          @if (pendingItems.length > 0) {
+            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Pendientes ({{ pendingItems.length }})</div>
+            <div class="flex flex-col gap-2 mb-4">
+              @for (item of pendingItems; track item.id) {
+                <div class="flex items-start gap-3 py-2 border-b border-gray-50 last:border-0">
+                  <button 
+                    (click)="item.type === 'pieza' ? togglePieceStatus(item.id, item.done) : toggleOrderItemStatus(item.id, item.done)"
+                    class="w-5 h-5 border border-gray-300 rounded flex items-center justify-center transition cursor-pointer bg-white">
+                  </button>
+                  <div class="flex-1">
+                    <h4 class="font-bold text-sm text-gray-800">
+                      {{ item.clientName }}
+                      @if (item.orderNumber) {
+                        <span class="text-xs text-gray-400 font-normal">#{{ item.orderNumber }}</span>
+                      }
+                    </h4>
+                    <p class="text-xs text-gray-400 mt-0.5">
+                      {{ item.productName }}@if (item.nota) { · {{ item.nota }} }
+                    </p>
+                    <div class="flex flex-wrap gap-1.5 mt-1.5">
+                      @for (tag of getPieceTags(item); track tag) {
+                        <span class="text-[9px] px-1.5 py-0.5 rounded-full bg-gray-50 text-gray-500 font-medium border border-gray-200">
+                          {{ tag }}
+                        </span>
+                      }
+                    </div>
+                  </div>
+                  @if (item.gcodeUrl || item.stlUrl) {
+                    <div class="flex gap-1.5 self-center flex-shrink-0">
+                      @if (item.gcodeUrl) {
+                        <a 
+                          [href]="item.gcodeUrl" 
+                          target="_blank"
+                          class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-[10px] font-bold text-gray-600 rounded-xl transition active:scale-[0.98] cursor-pointer"
+                          title="Abrir/Descargar G-code">
+                          <i class="ti ti-link text-xs"></i>
+                          <span>G-code</span>
+                        </a>
+                      }
+                      @if (item.stlUrl) {
+                        <a 
+                          [href]="item.stlUrl" 
+                          target="_blank"
+                          class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-[10px] font-bold text-gray-600 rounded-xl transition active:scale-[0.98] cursor-pointer"
+                          title="Abrir/Descargar STL">
+                          <i class="ti ti-file-3d text-xs"></i>
+                          <span>STL</span>
+                        </a>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Completed list in this lot group -->
+          @let completedItems = group.items.filter(i => i.done);
+          @if (completedItems.length > 0) {
+            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2" [class.mt-4]="pendingItems.length > 0">Listas ({{ completedItems.length }})</div>
+            <div class="flex flex-col gap-2">
+              @for (item of completedItems; track item.id) {
+                <div class="flex items-start gap-3 py-2 opacity-35 border-b border-gray-50 last:border-0">
+                  <button 
+                    (click)="item.type === 'pieza' ? togglePieceStatus(item.id, item.done) : toggleOrderItemStatus(item.id, item.done)"
+                    class="w-5 h-5 border border-green-500 bg-green-500 rounded flex items-center justify-center transition cursor-pointer text-white">
+                    <i class="ti ti-check text-[10px]"></i>
+                  </button>
+                  <div class="flex-1">
+                    <h4 class="font-bold text-sm text-gray-850 line-through">
+                      {{ item.clientName }} — {{ item.productName }}
+                    </h4>
+                  </div>
+                  @if (item.gcodeUrl || item.stlUrl) {
+                    <div class="flex gap-1.5 self-center flex-shrink-0">
+                      @if (item.gcodeUrl) {
+                        <a 
+                          [href]="item.gcodeUrl" 
+                          target="_blank"
+                          class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-[10px] font-bold text-gray-600 rounded-xl transition active:scale-[0.98] cursor-pointer"
+                          title="Abrir/Descargar G-code">
+                          <i class="ti ti-link text-xs"></i>
+                          <span>G-code</span>
+                        </a>
+                      }
+                      @if (item.stlUrl) {
+                        <a 
+                          [href]="item.stlUrl" 
+                          target="_blank"
+                          class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-[10px] font-bold text-gray-600 rounded-xl transition active:scale-[0.98] cursor-pointer"
+                          title="Abrir/Descargar STL">
+                          <i class="ti ti-file-3d text-xs"></i>
+                          <span>STL</span>
+                        </a>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+
+        </div>
+      }
+    </div>
+  }
+
+</div>

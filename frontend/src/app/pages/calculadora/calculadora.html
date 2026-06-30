@@ -1,0 +1,366 @@
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+  <!-- Left Column: Inputs Form -->
+  <div class="lg:col-span-2 flex flex-col gap-6">
+    
+    <div class="flex items-center gap-2.5">
+      <i class="ti ti-calculator text-2xl text-black"></i>
+      <h2 class="text-xl font-bold tracking-tight text-black">Calculador de Costos Inteligente</h2>
+    </div>
+
+    <!-- Error/Success Banners -->
+    @if (errorMessage()) {
+      <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-xs text-red-600 font-semibold flex items-center gap-2">
+        <i class="ti ti-alert-circle text-base"></i>
+        <span>{{ errorMessage() }}</span>
+      </div>
+    }
+    @if (successMessage()) {
+      <div class="p-4 rounded-xl bg-green-50 border border-green-200 text-xs text-green-600 font-semibold flex items-center gap-2">
+        <i class="ti ti-circle-check text-base"></i>
+        <span>{{ successMessage() }}</span>
+      </div>
+    }
+
+    <!-- Form Container -->
+    <form [formGroup]="calcForm" class="flex flex-col gap-6">
+      
+      <!-- Card 1: Configuración del Taller (Global Variables) -->
+      <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+        <div class="flex items-center gap-2 mb-4 border-b border-gray-100 pb-3">
+          <i class="ti ti-settings text-xl text-gray-500"></i>
+          <h3 class="font-bold text-xs uppercase tracking-wider text-gray-400">Configuración de Taller</h3>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Costo Filamento por KG -->
+          <div>
+            <label for="c-filamento" class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">
+              Costo de filamento por KG (ARS)
+            </label>
+            <div class="relative">
+              <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+              <input 
+                type="number" 
+                id="c-filamento" 
+                formControlName="costoFilamentoKg"
+                placeholder="Ej. 25000"
+                class="w-full pl-7 pr-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-black focus:outline-none bg-gray-50/50 transition">
+            </div>
+          </div>
+
+          <!-- Costo Eléctrico por Hora -->
+          <div>
+            <label for="c-electricidad" class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">
+              Costo eléctrico por hora (ARS)
+            </label>
+            <div class="relative">
+              <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+              <input 
+                type="number" 
+                id="c-electricidad" 
+                formControlName="costoElectricidadHora"
+                placeholder="Ej. 150"
+                class="w-full pl-7 pr-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-black focus:outline-none bg-gray-50/50 transition">
+            </div>
+          </div>
+
+          <!-- Desgaste Máquina por Hora -->
+          <div>
+            <label for="c-desgaste" class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">
+              Desgaste de máquina por hora (ARS)
+            </label>
+            <div class="relative">
+              <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+              <input 
+                type="number" 
+                id="c-desgaste" 
+                formControlName="desgasteMaquinaHora"
+                placeholder="Ej. 100"
+                class="w-full pl-7 pr-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-black focus:outline-none bg-gray-50/50 transition">
+            </div>
+          </div>
+
+          <!-- Margen de Error -->
+          <div>
+            <label for="c-error" class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">
+              Margen de error por fallos (%)
+            </label>
+            <div class="relative">
+              <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
+              <input 
+                type="number" 
+                id="c-error" 
+                formControlName="margenError"
+                placeholder="Ej. 15"
+                class="w-full pl-3.5 pr-8 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-black focus:outline-none bg-gray-50/50 transition">
+            </div>
+          </div>
+
+          <!-- Margen de Ganancia -->
+          <div class="md:col-span-2">
+            <label for="c-ganancia" class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">
+              Margen de ganancia limpia (%)
+            </label>
+            <div class="relative">
+              <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
+              <input 
+                type="number" 
+                id="c-ganancia" 
+                formControlName="margenGanancia"
+                placeholder="Ej. 100"
+                class="w-full pl-3.5 pr-8 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-black focus:outline-none bg-gray-50/50 transition">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Datos de Impresión (Slicer specs) -->
+      <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+        <div class="flex items-center gap-2 mb-4 border-b border-gray-100 pb-3">
+          <i class="ti ti-box text-xl text-gray-500"></i>
+          <h3 class="font-bold text-xs uppercase tracking-wider text-gray-400">Datos de Impresión (Slicer)</h3>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Peso de la pieza en gramos -->
+          <div>
+            <label for="c-peso" class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">
+              Peso de la pieza (gramos)
+            </label>
+            <div class="relative">
+              <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs">g</span>
+              <input 
+                type="number" 
+                id="c-peso" 
+                formControlName="pesoGramo"
+                placeholder="Ej. 100"
+                class="w-full pl-3.5 pr-8 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-black focus:outline-none bg-gray-50/50 transition">
+            </div>
+          </div>
+
+          <!-- Tiempo de impresión en horas -->
+          <div>
+            <label for="c-tiempo" class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">
+              Tiempo estimado (horas)
+            </label>
+            <div class="relative">
+              <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs">hs</span>
+              <input 
+                type="number" 
+                id="c-tiempo" 
+                formControlName="tiempoHora"
+                placeholder="Ej. 4"
+                class="w-full pl-3.5 pr-8 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-black focus:outline-none bg-gray-50/50 transition">
+            </div>
+          </div>
+
+          <!-- Costo extra post-procesado -->
+          <div>
+            <label for="c-post" class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">
+              Post-procesado / Adicional (ARS)
+            </label>
+            <div class="relative">
+              <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm">$</span>
+              <input 
+                type="number" 
+                id="c-post" 
+                formControlName="costoPostProcesado"
+                placeholder="Ej. 500"
+                class="w-full pl-7 pr-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-black focus:outline-none bg-gray-50/50 transition">
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- Right Column: Sticky Receipt Ticket -->
+  <div class="lg:col-span-1">
+    <div class="flex flex-col gap-6 sticky top-6">
+      
+      <!-- Receipt Ticket -->
+      <div class="bg-white border border-gray-200 rounded-3xl p-6 shadow-md relative overflow-hidden">
+        <!-- Top decorative receipt teeth -->
+        <div class="absolute top-0 left-0 right-0 h-1.5 bg-repeat-x" style="background-image: radial-gradient(circle, transparent 30%, #F7F7F5 30%); background-size: 10px 10px; background-position: 0 -5px;"></div>
+        
+        <div class="mt-2 text-center">
+          <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Desglose de Costos</span>
+          <h4 class="text-xs text-gray-400 mt-1">Impresión 3D Reactiva</h4>
+        </div>
+
+        <div class="border-t border-dashed border-gray-200 my-5"></div>
+
+        <!-- Breakdown List -->
+        <div class="flex flex-col gap-3.5 text-sm">
+          <div class="flex justify-between items-center">
+            <span class="text-gray-400 text-xs">Costo Material:</span>
+            <span class="font-mono font-medium text-gray-800">{{ costoMaterial() | currency:'ARS':'symbol-narrow':'1.0-2' }}</span>
+          </div>
+          
+          <div class="flex justify-between items-center">
+            <span class="text-gray-400 text-xs">Costo Operativo:</span>
+            <span class="font-mono font-medium text-gray-800">{{ costoOperativo() | currency:'ARS':'symbol-narrow':'1.0-2' }}</span>
+          </div>
+
+          <div class="flex justify-between items-center">
+            <span class="text-gray-400 text-xs">Post-procesado / Extras:</span>
+            <span class="font-mono font-medium text-gray-800">{{ (formValue().costoPostProcesado || 0) | currency:'ARS':'symbol-narrow':'1.0-2' }}</span>
+          </div>
+
+          <div class="flex justify-between items-center font-semibold text-gray-900 border-t border-gray-150 pt-2.5">
+            <span class="text-xs">Costo de Producción Base:</span>
+            <span class="font-mono">{{ costoBase() | currency:'ARS':'symbol-narrow':'1.0-2' }}</span>
+          </div>
+
+          <div class="flex justify-between items-center text-red-600">
+            <span class="text-xs">Falla & Merma (+{{ formValue().margenError }}%):</span>
+            <span class="font-mono font-medium">+{{ costoPorFallos() | currency:'ARS':'symbol-narrow':'1.0-2' }}</span>
+          </div>
+
+          <div class="flex justify-between items-center text-emerald-600">
+            <span class="text-xs">Ganancia Limpia (+{{ formValue().margenGanancia }}%):</span>
+            <span class="font-mono font-medium">+{{ gananciaLimpia() | currency:'ARS':'symbol-narrow':'1.0-2' }}</span>
+          </div>
+        </div>
+
+        <div class="border-t border-dashed border-gray-200 my-5"></div>
+
+        <!-- Client Selector for PDF -->
+        <div class="mb-4">
+          <label for="pdf-cliente" class="block text-[10px] font-bold text-gray-450 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+            <i class="ti ti-user text-xs"></i> Cliente Destinatario
+          </label>
+          <select 
+            id="pdf-cliente" 
+            [value]="selectedClientId()"
+            (change)="selectedClientId.set($any($event.target).value)"
+            class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-xs focus:border-black focus:outline-none bg-gray-50/50 transition font-semibold cursor-pointer">
+            <option value="">-- Presupuesto General (Sin Cliente) --</option>
+            @for (c of clients(); track c.id) {
+              <option [value]="c.id">{{ c.name }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Grand Total -->
+        <div class="text-center bg-[#F7F7F5] rounded-2xl p-4 border border-gray-150">
+          <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">Precio de Venta Sugerido</span>
+          <div class="text-2xl font-black text-black tracking-tight font-mono">
+            {{ precioFinal() | currency:'ARS':'symbol-narrow':'1.0-0' }}
+          </div>
+          <span class="text-[9px] text-gray-400 mt-1 block">(Precio Final Redondeado: {{ Math.round(precioFinal()) | currency:'ARS':'symbol-narrow':'1.0-0' }})</span>
+        </div>
+
+        <!-- Accordion trigger and PDF buttons -->
+        <div class="mt-5 flex flex-col gap-2.5">
+          <button 
+            type="button"
+            (click)="toggleSaveForm()"
+            class="w-full flex items-center justify-center gap-2 py-3 border border-black hover:bg-black hover:text-white text-black font-bold text-xs rounded-xl transition cursor-pointer active:scale-[0.98] bg-transparent">
+            <i class="ti" [class.ti-plus]="!showSaveForm()" [class.ti-minus]="showSaveForm()"></i>
+            <span>{{ showSaveForm() ? 'Ocultar Formulario' : 'Guardar en Catálogo' }}</span>
+          </button>
+
+          <button 
+            type="button"
+            (click)="generarPDF()"
+            class="w-full flex items-center justify-center gap-2 py-3 bg-[#3A3D40] hover:bg-black text-white font-bold text-xs rounded-xl transition cursor-pointer active:scale-[0.98] border-none shadow-sm">
+            <i class="ti ti-file-download text-base"></i>
+            <span>Descargar Presupuesto (PDF)</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Expandable Save Area (Accordion Panel) -->
+      @if (showSaveForm()) {
+        <div class="bg-white border border-gray-200 rounded-3xl p-5 shadow-md flex flex-col gap-4 animate-[fadeIn_0.2s_ease-out]">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500 flex items-center gap-1.5">
+            <i class="ti ti-books text-base text-gray-600"></i>
+            Registrar Producto Nuevo
+          </h4>
+
+          <form [formGroup]="saveForm" (ngSubmit)="guardarComoProducto()" class="flex flex-col gap-4">
+            
+            <!-- Nombre del Producto -->
+            <div>
+              <label for="s-name" class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">
+                Nombre del Producto
+              </label>
+              <input 
+                type="text" 
+                id="s-name" 
+                formControlName="productName"
+                placeholder="Ej. Soporte Auriculares Pro"
+                class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-black focus:outline-none bg-gray-50/50 transition">
+            </div>
+
+            <!-- Tipo de Producto -->
+            <div>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Tipo de producto</label>
+              <div class="flex gap-4">
+                <label class="flex items-center gap-1.5 text-xs font-semibold cursor-pointer">
+                  <input 
+                    type="radio" 
+                    value="caja" 
+                    formControlName="tipo" 
+                    (change)="onSaveTipoChange()"
+                    class="accent-black w-4 h-4">
+                  <span>Caja municiones</span>
+                </label>
+                <label class="flex items-center gap-1.5 text-xs font-semibold cursor-pointer">
+                  <input 
+                    type="radio" 
+                    value="otro" 
+                    formControlName="tipo" 
+                    (change)="onSaveTipoChange()"
+                    class="accent-black w-4 h-4">
+                  <span>Otro producto</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Component Pieces -->
+            <div>
+              <div class="flex justify-between items-center mb-1.5">
+                <label for="s-pieces" class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                  Piezas componentes
+                </label>
+                @if (saveForm.get('tipo')?.value === 'caja') {
+                  <span class="text-[9px] text-amber-600 font-bold uppercase">Requeridas</span>
+                } @else {
+                  <span class="text-[9px] text-gray-400 uppercase">Opcionales</span>
+                }
+              </div>
+              <input 
+                type="text" 
+                id="s-pieces" 
+                formControlName="pieces"
+                placeholder="Ej. Cuerpo, Soporte, Tapa"
+                class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-black focus:outline-none bg-gray-50/50 transition">
+              <p class="text-[9px] text-gray-400 mt-1">Escribe los nombres separados por comas.</p>
+            </div>
+
+            <!-- Submit action -->
+            <button 
+              type="submit" 
+              [disabled]="isLoading() || saveForm.invalid"
+              class="w-full inline-flex items-center justify-center gap-1.5 py-3 bg-[#1A1A1A] hover:bg-black disabled:bg-gray-400 text-white rounded-xl font-bold text-xs shadow-sm transition active:scale-[0.98] cursor-pointer border-none mt-2">
+              @if (isLoading()) {
+                <span class="animate-spin inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full"></span>
+              } @else {
+                <i class="ti ti-device-floppy text-base"></i>
+              }
+              <span>Guardar en Base de Datos</span>
+            </button>
+
+          </form>
+        </div>
+      }
+
+    </div>
+  </div>
+
+</div>

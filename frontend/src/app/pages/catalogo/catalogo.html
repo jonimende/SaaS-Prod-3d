@@ -1,0 +1,250 @@
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+  <!-- Left/Main Panel (Listings) -->
+  <div class="lg:col-span-2 flex flex-col gap-6">
+    
+    <!-- Error banner -->
+    @if (errorMessage()) {
+      <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-xs text-red-600 font-semibold flex items-center gap-2">
+        <i class="ti ti-alert-circle text-base"></i>
+        <span>{{ errorMessage() }}</span>
+      </div>
+    }
+
+    <!-- Loading Indicator -->
+    @if (isLoading() && products().length === 0) {
+      <div class="flex justify-center items-center py-12">
+        <span class="animate-spin inline-block w-8 h-8 border-4 border-black border-t-transparent rounded-full"></span>
+      </div>
+    }
+
+    <!-- Section: Cajas de municiones -->
+    <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+      <div class="flex items-center gap-2 mb-4 border-b border-gray-100 pb-3">
+        <i class="ti ti-folder text-xl text-amber-500"></i>
+        <h3 class="font-bold text-xs uppercase tracking-wider text-gray-400">Cajas de municiones ({{ cajas().length }})</h3>
+      </div>
+
+      @if (cajas().length === 0 && !isLoading()) {
+        <p class="text-xs text-gray-400 py-4 italic">No hay cajas registradas en el catálogo.</p>
+      } @else {
+        <div class="divide-y divide-gray-100">
+          @for (product of cajas(); track product.id) {
+            <div class="flex items-center justify-between py-3.5 first:pt-0 last:pb-0">
+              <div class="flex items-center gap-3">
+                <div class="w-2.5 h-2.5 rounded-full bg-amber-500"></div>
+                <div>
+                  <h4 class="font-semibold text-sm">{{ product.name }}</h4>
+                  <p class="text-xs text-gray-400 mt-0.5">
+                    {{ product.price | currency:'ARS':'symbol-narrow':'1.0-0' }} · 
+                    {{ product.defaultPieces.length }} piezas ({{ product.defaultPieces.join(', ') }})
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button 
+                  (click)="editProduct(product)"
+                  class="p-2 text-gray-400 hover:text-black hover:bg-gray-50 rounded-lg transition cursor-pointer border-none bg-transparent"
+                  title="Editar">
+                  <i class="ti ti-pencil text-base"></i>
+                </button>
+                <button 
+                  (click)="deleteProduct(product.id)"
+                  class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition cursor-pointer border-none bg-transparent"
+                  title="Eliminar">
+                  <i class="ti ti-trash text-base"></i>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Section: Otros productos -->
+    <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+      <div class="flex items-center gap-2 mb-4 border-b border-gray-100 pb-3">
+        <i class="ti ti-tool text-xl text-purple-500"></i>
+        <h3 class="font-bold text-xs uppercase tracking-wider text-gray-400">Otros productos ({{ otros().length }})</h3>
+      </div>
+
+      @if (otros().length === 0 && !isLoading()) {
+        <p class="text-xs text-gray-400 py-4 italic">No hay otros productos registrados en el catálogo.</p>
+      } @else {
+        <div class="divide-y divide-gray-100">
+          @for (product of otros(); track product.id) {
+            <div class="flex items-center justify-between py-3.5 first:pt-0 last:pb-0">
+              <div class="flex items-center gap-3">
+                <div class="w-2.5 h-2.5 rounded-full bg-purple-500"></div>
+                <div>
+                  <h4 class="font-semibold text-sm">{{ product.name }}</h4>
+                  <p class="text-xs text-gray-400 mt-0.5">
+                    {{ product.price | currency:'ARS':'symbol-narrow':'1.0-0' }}
+                    @if (product.defaultPieces.length > 0) {
+                      · {{ product.defaultPieces.length }} piezas ({{ product.defaultPieces.join(', ') }})
+                    }
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button 
+                  (click)="editProduct(product)"
+                  class="p-2 text-gray-400 hover:text-black hover:bg-gray-50 rounded-lg transition cursor-pointer border-none bg-transparent"
+                  title="Editar">
+                  <i class="ti ti-pencil text-base"></i>
+                </button>
+                <button 
+                  (click)="deleteProduct(product.id)"
+                  class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition cursor-pointer border-none bg-transparent"
+                  title="Eliminar">
+                  <i class="ti ti-trash text-base"></i>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+  </div>
+
+  <!-- Right Panel (Add/Edit Form Widget) -->
+  <div class="lg:col-span-1">
+    <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm sticky top-6">
+      <h3 class="text-sm font-bold uppercase tracking-wider text-gray-500 mb-5 flex items-center gap-2">
+        <i class="ti" [class.ti-plus]="!isEditMode()" [class.ti-edit]="isEditMode()"></i>
+        {{ isEditMode() ? 'Editar Producto' : 'Agregar al Catálogo' }}
+      </h3>
+
+      <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+        <!-- Name -->
+        <div>
+          <label for="p-name" class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Nombre del producto</label>
+          <input 
+            type="text" 
+            id="p-name" 
+            formControlName="name"
+            placeholder="Ej. Caja 9mm x100 o Traba repuesto"
+            class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-black focus:outline-none bg-gray-50/50 transition">
+        </div>
+
+        <!-- Price -->
+        <div>
+          <label for="p-price" class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Precio (ARS)</label>
+          <input 
+            type="number" 
+            id="p-price" 
+            formControlName="price"
+            placeholder="Ej. 25000"
+            class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-black focus:outline-none bg-gray-50/50 transition">
+        </div>
+
+        <!-- Tipo -->
+        <div>
+          <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Tipo de producto</label>
+          <div class="flex gap-4">
+            <label class="flex items-center gap-2 text-xs font-semibold cursor-pointer">
+              <input 
+                type="radio" 
+                value="caja" 
+                formControlName="tipo" 
+                (change)="onTipoChange()"
+                class="accent-black w-4 h-4">
+              <span>Caja municiones</span>
+            </label>
+            <label class="flex items-center gap-2 text-xs font-semibold cursor-pointer">
+              <input 
+                type="radio" 
+                value="otro" 
+                formControlName="tipo" 
+                (change)="onTipoChange()"
+                class="accent-black w-4 h-4">
+              <span>Otro producto</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Pieces -->
+        <div>
+          <div class="flex justify-between items-center mb-1.5">
+            <label for="p-pieces" class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Piezas componentes</label>
+            @if (productForm.get('tipo')?.value === 'caja') {
+              <span class="text-[10px] text-amber-600 font-bold uppercase">Requeridas</span>
+            } @else {
+              <span class="text-[10px] text-gray-400 uppercase">Opcional</span>
+            }
+          </div>
+          <input 
+            type="text" 
+            id="p-pieces" 
+            formControlName="pieces"
+            placeholder="Separadas por coma: Tapa, Base, Centro"
+            class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-black focus:outline-none bg-gray-50/50 transition">
+          <p class="text-[10px] text-gray-400 mt-1">Escribe las piezas separadas por comas. Deja vacío si el producto no requiere piezas.</p>
+        </div>
+
+        <!-- G-code URL -->
+        <div>
+          <label for="p-gcodeUrl" class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+            <i class="ti ti-link text-xs"></i> Enlace Archivo G-code (Opcional)
+          </label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+              <i class="ti ti-link text-base"></i>
+            </span>
+            <input 
+              type="text" 
+              id="p-gcodeUrl" 
+              formControlName="gcodeUrl"
+              placeholder="Ej. https://drive.google.com/.../file.gcode"
+              class="w-full pl-9 pr-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-black focus:outline-none bg-gray-50/50 transition">
+          </div>
+        </div>
+
+        <!-- STL URL -->
+        <div>
+          <label for="p-stlUrl" class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+            <i class="ti ti-file-3d text-xs"></i> Enlace Archivo STL (Opcional)
+          </label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+              <i class="ti ti-file-3d text-base"></i>
+            </span>
+            <input 
+              type="text" 
+              id="p-stlUrl" 
+              formControlName="stlUrl"
+              placeholder="Ej. https://drive.google.com/.../file.stl"
+              class="w-full pl-9 pr-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-black focus:outline-none bg-gray-50/50 transition">
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex gap-2.5 mt-2">
+          @if (isEditMode()) {
+            <button 
+              type="button" 
+              (click)="cancelEdit()"
+              class="flex-1 inline-flex items-center justify-center px-4 py-3 border border-gray-200 hover:bg-gray-50 rounded-xl font-bold text-xs shadow-sm transition active:scale-[0.98] cursor-pointer bg-white">
+              Cancelar
+            </button>
+          }
+          
+          <button 
+            type="submit" 
+            [disabled]="isLoading() || productForm.invalid"
+            class="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-3 bg-[#1A1A1A] hover:bg-black disabled:bg-gray-400 text-white rounded-xl font-bold text-xs shadow-sm transition active:scale-[0.98] cursor-pointer border-none">
+            @if (isLoading()) {
+              <span class="animate-spin inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full"></span>
+            } @else {
+              <i class="ti" [class.ti-plus]="!isEditMode()" [class.ti-device-floppy]="isEditMode()"></i>
+            }
+            <span>{{ isEditMode() ? 'Guardar Cambios' : 'Agregar al Catálogo' }}</span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,17 @@
+/* Tailwind CSS Directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tabler Icons Font Stylesheet */
+@import 'https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css';
+
+/* Global Styles matching the Prototype */
+html, body {
+  height: 100%;
+  margin: 0;
+  background-color: #F7F7F5;
+  color: #1A1A1A;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 15px;
+}

@@ -1,0 +1,104 @@
+<div class="flex flex-col gap-6">
+
+  <!-- Header Section -->
+  <div class="flex justify-between items-center">
+    <h2 class="text-xl font-bold tracking-tight">Resumen de Producción</h2>
+  </div>
+
+  <!-- Loading Indicator -->
+  @if (isLoading() && orders().length === 0) {
+    <div class="flex justify-center items-center py-12">
+      <span class="animate-spin inline-block w-8 h-8 border-4 border-black border-t-transparent rounded-full"></span>
+    </div>
+  }
+
+  @if (orders().length === 0 && !isLoading()) {
+    <div class="border border-dashed border-gray-300 rounded-2xl p-12 text-center text-gray-400 bg-white shadow-sm">
+      <i class="ti ti-chart-bar text-4xl mb-2 block"></i>
+      <p class="text-sm font-medium">Carga pedidos para ver las estadísticas globales de producción.</p>
+    </div>
+  } @else {
+    <!-- Stats Cards Grid -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      
+      <!-- Stat 1: Pedidos -->
+      <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Pedidos</div>
+        <div class="text-3xl font-extrabold text-gray-800">{{ totalOrders() }}</div>
+      </div>
+
+      <!-- Stat 2: Completos -->
+      <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Completos</div>
+        <div class="text-3xl font-extrabold text-gray-800">{{ completedOrders() }}</div>
+      </div>
+
+      <!-- Stat 3: Unidades Totales -->
+      <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Unidades Totales</div>
+        <div class="text-3xl font-extrabold text-gray-800">{{ totalUnits() }}</div>
+      </div>
+
+      <!-- Stat 4: Progreso Global -->
+      <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Progreso</div>
+        <div class="text-3xl font-extrabold text-gray-800">{{ globalProgress() }}%</div>
+      </div>
+
+    </div>
+
+    <!-- Detailed Section: Estado por Pedido -->
+    <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm flex flex-col gap-4">
+      <div class="flex items-center gap-2 mb-2 border-b border-gray-100 pb-3">
+        <i class="ti ti-activity text-xl text-green-500"></i>
+        <h3 class="font-bold text-xs uppercase tracking-wider text-gray-400">Estado por pedido</h3>
+      </div>
+
+      <div class="flex flex-col gap-4 divide-y divide-gray-100">
+        @for (order of orders(); track order.id; let isLast = $last) {
+          <div class="pt-4 first:pt-0">
+            
+            <div class="flex justify-between items-start gap-4 mb-2">
+              <div>
+                <h4 class="font-bold text-sm text-gray-800">
+                  {{ order.clientName }}
+                  @if (order.number) {
+                    <span class="text-xs text-gray-400 font-normal">#{{ order.number }}</span>
+                  }
+                </h4>
+              </div>
+              
+              <!-- Badges -->
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase border-none"
+                    [class.bg-amber-50]="getOrderProgress(order).done === 0"
+                    [class.text-amber-700]="getOrderProgress(order).done === 0"
+                    [class.bg-green-50]="getOrderProgress(order).done === getOrderProgress(order).total && getOrderProgress(order).total > 0"
+                    [class.text-green-700]="getOrderProgress(order).done === getOrderProgress(order).total && getOrderProgress(order).total > 0"
+                    [class.bg-blue-50]="getOrderProgress(order).done > 0 && getOrderProgress(order).done < getOrderProgress(order).total"
+                    [class.text-blue-700]="getOrderProgress(order).done > 0 && getOrderProgress(order).done < getOrderProgress(order).total">
+                @if (getOrderProgress(order).done === 0) {
+                  Pendiente
+                } @else if (getOrderProgress(order).done === getOrderProgress(order).total && getOrderProgress(order).total > 0) {
+                  Completo
+                } @else {
+                  {{ getOrderProgress(order).done }}/{{ getOrderProgress(order).total }}
+                }
+              </span>
+            </div>
+
+            <!-- Mini Progress bar -->
+            <div class="w-full bg-gray-150 h-1.5 rounded-full mt-3 overflow-hidden">
+              <div class="bg-green-500 h-1.5 rounded-full transition-all duration-300"
+                   [style.width.%]="getOrderProgress(order).percentage"></div>
+            </div>
+            <div class="text-[10px] text-gray-400 font-semibold mt-1.5">
+              {{ getOrderProgress(order).done }}/{{ getOrderProgress(order).total }} · {{ getOrderProgress(order).percentage }}%
+            </div>
+
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+</div>

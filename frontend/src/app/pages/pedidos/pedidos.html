@@ -1,0 +1,319 @@
+<div class="flex flex-col gap-6">
+
+  <!-- Header Section -->
+  <div class="flex justify-between items-center">
+    <h2 class="text-xl font-bold tracking-tight">Pedidos</h2>
+    <button 
+      (click)="openModal()"
+      class="inline-flex items-center gap-1.5 bg-[#1A1A1A] hover:bg-black text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow-sm active:scale-[0.98] transition cursor-pointer border-none">
+      <i class="ti ti-plus"></i> Nuevo pedido
+    </button>
+  </div>
+
+  <!-- Error banner -->
+  @if (errorMessage()) {
+    <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-xs text-red-600 font-semibold flex items-center gap-2">
+      <i class="ti ti-alert-circle text-base"></i>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  <!-- Loading Indicator -->
+  @if (isLoading() && orders().length === 0) {
+    <div class="flex justify-center items-center py-12">
+      <span class="animate-spin inline-block w-8 h-8 border-4 border-black border-t-transparent rounded-full"></span>
+    </div>
+  }
+
+  <!-- Empty state -->
+  @if (orders().length === 0 && !isLoading()) {
+    <div class="border border-dashed border-gray-300 rounded-2xl p-12 text-center text-gray-400 bg-white shadow-sm">
+      <i class="ti ti-package text-4xl mb-2 block"></i>
+      <p class="text-sm font-medium">No hay pedidos registrados todavía.</p>
+    </div>
+  } @else {
+    <!-- Orders Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      @for (order of orders(); track order.id) {
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+          <div>
+            <!-- Card Header -->
+            <div class="flex justify-between items-start gap-4 mb-3">
+              <div>
+                <h3 class="font-bold text-base text-gray-800">
+                  {{ order.clientName }}
+                  @if (order.number) {
+                    <span class="text-xs text-gray-400 font-normal">#{{ order.number }}</span>
+                  }
+                </h3>
+                <p class="text-xs text-gray-400 mt-0.5">
+                  {{ order.items.length }} producto{{ order.items.length !== 1 ? 's' : '' }} · 
+                  {{ getOrderProgress(order).total }} unid.
+                </p>
+              </div>
+
+              <!-- Completion status badge -->
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase border-none"
+                    [class.bg-amber-50]="getOrderProgress(order).done === 0"
+                    [class.text-amber-700]="getOrderProgress(order).done === 0"
+                    [class.bg-green-50]="getOrderProgress(order).done === getOrderProgress(order).total && getOrderProgress(order).total > 0"
+                    [class.text-green-700]="getOrderProgress(order).done === getOrderProgress(order).total && getOrderProgress(order).total > 0"
+                    [class.bg-blue-50]="getOrderProgress(order).done > 0 && getOrderProgress(order).done < getOrderProgress(order).total"
+                    [class.text-blue-700]="getOrderProgress(order).done > 0 && getOrderProgress(order).done < getOrderProgress(order).total">
+                @if (getOrderProgress(order).done === 0) {
+                  Pendiente
+                } @else if (getOrderProgress(order).done === getOrderProgress(order).total && getOrderProgress(order).total > 0) {
+                  Completo
+                } @else {
+                  {{ getOrderProgress(order).done }}/{{ getOrderProgress(order).total }}
+                }
+              </span>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-gray-150 h-1.5 rounded-full mt-4 overflow-hidden">
+              <div class="bg-green-500 h-1.5 rounded-full transition-all duration-300"
+                   [style.width.%]="getOrderProgress(order).percentage"></div>
+            </div>
+            <div class="text-[10px] text-gray-400 font-semibold mt-1.5 mb-4">
+              {{ getOrderProgress(order).percentage }}% completado
+            </div>
+
+            <!-- Products / Pieces checklist inside the order -->
+            <div class="flex flex-col gap-4 border-t border-gray-100 pt-4">
+              @for (item of order.items; track item.id; let itemIndex = $index) {
+                <div>
+                  @if (item.pieces && item.pieces.length > 0) {
+                    <!-- Box product list (Tapa, Base, etc.) -->
+                    <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                      {{ item.product?.name || 'Caja' }} 
+                      ({{ item.pieces.filter(p => p.done).length }}/{{ item.pieces.length }})
+                    </div>
+                    <div class="flex flex-col gap-2">
+                      @for (piece of item.pieces; track piece.id; let pieceIndex = $index) {
+                        <div class="flex items-start gap-3 py-1 border-b border-gray-50 last:border-0">
+                          <button 
+                            (click)="togglePieceStatus(piece.id, piece.done)"
+                            class="w-5 h-5 border border-gray-300 rounded flex items-center justify-center transition cursor-pointer bg-white"
+                            [class.bg-green-500]="piece.done"
+                            [class.border-green-500]="piece.done"
+                            [class.text-white]="piece.done">
+                            @if (piece.done) {
+                              <i class="ti ti-check text-[10px]"></i>
+                            }
+                          </button>
+                          <div class="flex-1">
+                            <span class="text-sm text-gray-700 font-medium" [class.line-through]="piece.done" [class.text-gray-350]="piece.done">
+                              {{ piece.name }}
+                            </span>
+                            @if (!piece.done) {
+                              <div class="flex flex-wrap gap-1.5 mt-1">
+                                @for (tag of getPieceTags(piece); track tag) {
+                                  <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500 font-medium border border-gray-200">
+                                    {{ tag }}
+                                  </span>
+                                }
+                              </div>
+                            }
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  } @else {
+                    <!-- Simple product without pieces checklist -->
+                    <div class="flex items-start gap-3 py-2 border-b border-gray-50 last:border-0">
+                      <button 
+                        (click)="toggleOrderItemStatus(item.id, item.done)"
+                        class="w-5 h-5 border border-gray-300 rounded flex items-center justify-center transition cursor-pointer bg-white"
+                        [class.bg-green-500]="item.done"
+                        [class.border-green-500]="item.done"
+                        [class.text-white]="item.done">
+                        @if (item.done) {
+                          <i class="ti ti-check text-[10px]"></i>
+                        }
+                      </button>
+                      <div class="flex-1">
+                        <span class="text-sm text-gray-700 font-medium" [class.line-through]="item.done" [class.text-gray-350]="item.done">
+                          {{ item.product?.name || 'Producto simple' }}
+                        </span>
+                        @if (item.nota) {
+                          <p class="text-xs text-gray-400 mt-0.5">{{ item.nota }}</p>
+                        }
+                        <span class="inline-block mt-1 text-[9px] px-1.5 py-0.5 bg-purple-50 text-purple-600 rounded-full font-bold uppercase">Otro</span>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Card Actions -->
+          <div class="flex justify-end mt-6 pt-4 border-t border-gray-50">
+            <button 
+              (click)="deleteOrder(order.id)"
+              class="inline-flex items-center gap-1 text-xs text-red-500 hover:bg-red-50 hover:text-red-700 px-3 py-1.5 rounded-lg transition border-none bg-transparent cursor-pointer font-bold">
+              <i class="ti ti-trash"></i> Eliminar pedido
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+</div>
+
+<!-- MODAL NEW ORDER OVERLAY -->
+@if (showModal()) {
+  <div class="fixed inset-0 bg-black/50 z-50 flex items-end md:items-center justify-center p-0 md:p-4">
+    <div class="bg-[#F7F7F5] w-full max-w-2xl rounded-t-3xl md:rounded-2xl p-6 shadow-xl max-h-[90vh] overflow-y-auto flex flex-col justify-between">
+      
+      <div>
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-lg font-bold text-gray-800">Nuevo Pedido</h3>
+          <button (click)="closeModal()" class="text-gray-400 hover:text-black border-none bg-transparent cursor-pointer p-1">
+            <i class="ti ti-x text-xl"></i>
+          </button>
+        </div>
+
+        <form [formGroup]="orderForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-5">
+          <!-- Client & Number Grid -->
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="f-num" class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Número de pedido</label>
+              <input 
+                type="text" 
+                id="f-num" 
+                formControlName="number"
+                placeholder="Ej. 105"
+                class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-black focus:outline-none bg-white transition">
+            </div>
+            <div>
+              <label for="f-cli" class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Cliente</label>
+              <select 
+                id="f-cli" 
+                formControlName="clientName"
+                class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-black focus:outline-none bg-white transition font-semibold">
+                <option value="" disabled selected>— Seleccionar Cliente —</option>
+                @for (client of clients(); track client.id) {
+                  <option [value]="client.name">{{ client.name }}</option>
+                }
+              </select>
+              @if (clients().length === 0) {
+                <p class="text-[9px] text-amber-600 mt-1 font-semibold">
+                  No hay clientes registrados.
+                  <a routerLink="/dashboard/clientes" class="underline font-bold cursor-pointer">Registrar en el CRM</a>
+                </p>
+              }
+            </div>
+          </div>
+
+          <!-- Product Picker drop-down -->
+          <div class="border-t border-gray-200 pt-4">
+            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Agregar productos al pedido</label>
+            <div class="flex gap-2">
+              <select 
+                [(ngModel)]="selectedProductId" 
+                [ngModelOptions]="{standalone: true}"
+                class="flex-1 px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-black focus:outline-none bg-white transition">
+                <option value="">— Selecciona un producto del catálogo —</option>
+                @for (prod of products(); track prod.id) {
+                  <option [value]="prod.id">{{ prod.name }} ({{ prod.tipo === 'caja' ? 'Caja' : 'Otro' }})</option>
+                }
+              </select>
+              <button 
+                type="button" 
+                (click)="addProductToOrder()"
+                class="inline-flex items-center justify-center w-11 h-11 bg-white hover:bg-gray-50 border border-gray-200 rounded-xl text-lg font-bold shadow-sm transition active:scale-[0.98] cursor-pointer">
+                <i class="ti ti-plus"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Dynamic FormArray List -->
+          <div formArrayName="products" class="flex flex-col gap-4">
+            @if (itemsFormArray.controls.length === 0) {
+              <p class="text-xs text-gray-400 italic py-2 text-center">No has agregado ningún producto al pedido.</p>
+            }
+            
+            @for (itemGroup of itemsFormArray.controls; track itemGroup; let i = $index) {
+              <div [formGroupName]="i" class="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm flex flex-col gap-3 relative">
+                
+                <div class="flex justify-between items-center">
+                  <div>
+                    <span class="font-bold text-sm text-gray-700">{{ itemGroup.get('name')?.value }}</span>
+                    <span class="ml-2 text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase"
+                          [class.bg-amber-50]="itemGroup.get('tipo')?.value === 'caja'"
+                          [class.text-amber-600]="itemGroup.get('tipo')?.value === 'caja'"
+                          [class.bg-purple-50]="itemGroup.get('tipo')?.value !== 'caja'"
+                          [class.text-purple-600]="itemGroup.get('tipo')?.value !== 'caja'">
+                      {{ itemGroup.get('tipo')?.value === 'caja' ? 'Caja' : 'Otro' }}
+                    </span>
+                  </div>
+                  
+                  <button 
+                    type="button"
+                    (click)="removeOrderItem(i)"
+                    class="text-gray-400 hover:text-red-500 border-none bg-transparent cursor-pointer p-1">
+                    <i class="ti ti-trash text-base"></i>
+                  </button>
+                </div>
+
+                <!-- Fields for Box Type products -->
+                @if (itemGroup.get('tipo')?.value === 'caja') {
+                  <div class="grid grid-cols-2 gap-3">
+                    <input type="text" formControlName="color" placeholder="Color caja (Ej. Verde)" class="px-3 py-2 border border-gray-200 rounded-lg text-xs bg-gray-50 focus:outline-none focus:border-black transition">
+                    <input type="text" formControlName="letras" placeholder="Color letras (Ej. Blanco)" class="px-3 py-2 border border-gray-200 rounded-lg text-xs bg-gray-50 focus:outline-none focus:border-black transition">
+                    <input type="text" formControlName="nombre" placeholder="Nombre grabado (Ej. JUAN)" class="px-3 py-2 border border-gray-200 rounded-lg text-xs bg-gray-50 focus:outline-none focus:border-black transition">
+                    <input type="text" formControlName="logo" placeholder="Logo (Ej. Jabalí)" class="px-3 py-2 border border-gray-200 rounded-lg text-xs bg-gray-50 focus:outline-none focus:border-black transition">
+                  </div>
+                  
+                  <div class="flex items-center gap-4 text-xs font-medium text-gray-500 mt-1">
+                    <span class="text-[9px] uppercase font-bold tracking-wider">Grabar en:</span>
+                    <label class="flex items-center gap-1.5 cursor-pointer">
+                      <input type="checkbox" formControlName="enTapa" class="accent-black w-4 h-4">
+                      <span>Tapa</span>
+                    </label>
+                    <label class="flex items-center gap-1.5 cursor-pointer">
+                      <input type="checkbox" formControlName="enBase" class="accent-black w-4 h-4">
+                      <span>Base</span>
+                    </label>
+                  </div>
+                } @else {
+                  <!-- Fields for Other Type products -->
+                  <div>
+                    <input type="text" formControlName="nota" placeholder="Nota / descripción (ej. Mango de madera, grabar iniciales)" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs bg-gray-50 focus:outline-none focus:border-black transition">
+                  </div>
+                }
+
+              </div>
+            }
+          </div>
+
+          <!-- Modal footer actions -->
+          <div class="flex gap-3 border-t border-gray-200 pt-5 mt-4">
+            <button 
+              type="button" 
+              (click)="closeModal()"
+              class="flex-1 inline-flex items-center justify-center px-4 py-3 border border-gray-200 hover:bg-gray-50 rounded-xl font-bold text-sm shadow-sm transition active:scale-[0.98] cursor-pointer bg-white">
+              Cancelar
+            </button>
+            <button 
+              type="submit" 
+              [disabled]="isLoading() || orderForm.invalid"
+              class="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-3 bg-[#1A1A1A] hover:bg-black disabled:bg-gray-400 text-white rounded-xl font-bold text-sm shadow-sm transition active:scale-[0.98] cursor-pointer border-none">
+              @if (isLoading()) {
+                <span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
+              } @else {
+                <i class="ti ti-device-floppy"></i>
+              }
+              <span>Guardar pedido</span>
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+    </div>
+  </div>
+}

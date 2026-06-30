@@ -1,0 +1,14 @@
+# Compiled output
+/dist
+/out-tsc
+
+# Dependencies
+/node_modules
+
+# Sensitive environment variables
+.env
+
+# IDE and system files
+.vscode/
+.DS_Store
+Thumbs.db

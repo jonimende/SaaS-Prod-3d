@@ -1,0 +1,89 @@
+<div class="flex flex-col items-center justify-center min-h-screen p-6 bg-[#F7F7F5]">
+  <div class="w-full max-w-md bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
+    
+    <div class="text-center mb-8">
+      <div class="text-5xl mb-4">📦</div>
+      <h1 class="text-2xl font-bold tracking-tight">Producción 3D</h1>
+      <p class="text-xs text-gray-500 mt-1.5">
+        @if (isLoginMode()) {
+          Ingresá con tus credenciales para acceder al taller
+        } @else {
+          Crea tu cuenta de taller para iniciar
+        }
+      </p>
+    </div>
+
+    <!-- Error Banner -->
+    @if (errorMessage()) {
+      <div class="mb-5 p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-600 font-semibold flex items-center gap-2">
+        <i class="ti ti-alert-circle text-base"></i>
+        <span>{{ errorMessage() }}</span>
+      </div>
+    }
+
+    <!-- Form -->
+    <form [formGroup]="authForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+      
+      <!-- Name Field (Only on Register) -->
+      @if (!isLoginMode()) {
+        <div>
+          <label for="name" class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Nombre completo</label>
+          <input 
+            type="text" 
+            id="name" 
+            formControlName="name"
+            placeholder="Ej. Juan Pérez"
+            class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-black focus:outline-none bg-gray-50/50 transition">
+        </div>
+      }
+
+      <!-- Email Field -->
+      <div>
+        <label for="email" class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Correo electrónico</label>
+        <input 
+          type="email" 
+          id="email" 
+          formControlName="email"
+          placeholder="nombre@taller.com"
+          class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-black focus:outline-none bg-gray-50/50 transition">
+      </div>
+
+      <!-- Password Field -->
+      <div>
+        <label for="password" class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Contraseña</label>
+        <input 
+          type="password" 
+          id="password" 
+          formControlName="password"
+          placeholder="••••••••"
+          class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-black focus:outline-none bg-gray-50/50 transition">
+      </div>
+
+      <!-- Submit Button -->
+      <button 
+        type="submit" 
+        [disabled]="isLoading()"
+        class="mt-2 w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-[#1A1A1A] hover:bg-black disabled:bg-gray-400 text-white rounded-xl font-bold text-sm shadow-sm transition active:scale-[0.98] cursor-pointer border-none">
+        
+        @if (isLoading()) {
+          <span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
+          <span>Procesando...</span>
+        } @else {
+          <i class="ti ti-login text-base"></i>
+          <span>{{ isLoginMode() ? 'Iniciar sesión' : 'Registrarse' }}</span>
+        }
+      </button>
+    </form>
+
+    <!-- Toggle Login/Register Mode -->
+    <div class="text-center mt-6 pt-5 border-t border-gray-100">
+      <button 
+        type="button" 
+        (click)="toggleMode()" 
+        class="text-xs text-gray-500 hover:text-black font-semibold cursor-pointer border-none bg-transparent">
+        {{ isLoginMode() ? '¿No tenés una cuenta? Registrate gratis' : '¿Ya tenés una cuenta? Inicia sesión' }}
+      </button>
+    </div>
+
+  </div>
+</div>

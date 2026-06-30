@@ -1,0 +1,131 @@
+<div class="min-h-screen flex flex-col md:flex-row bg-[#F7F7F5]">
+  
+  <!-- Sidebar Navigation (Desktop: visible, Mobile: hidden) -->
+  <aside class="hidden md:flex md:flex-col md:w-64 bg-white border-r border-gray-250 min-h-screen p-6">
+    <div class="flex items-center gap-3 mb-8">
+      <span class="text-3xl">📦</span>
+      <span class="font-bold text-lg tracking-tight">Producción 3D</span>
+    </div>
+    
+    <nav class="flex flex-col gap-1.5 flex-1">
+      <a routerLink="pedidos" routerLinkActive="bg-gray-100 text-black font-semibold" [routerLinkActiveOptions]="{exact: true}"
+         class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-black transition cursor-pointer">
+        <i class="ti ti-package text-lg"></i>
+        Pedidos
+      </a>
+      <a routerLink="lotes" routerLinkActive="bg-gray-100 text-black font-semibold"
+         class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-black transition cursor-pointer">
+        <i class="ti ti-layers-intersect text-lg"></i>
+        Lotes
+      </a>
+      <a routerLink="resumen" routerLinkActive="bg-gray-100 text-black font-semibold"
+         class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-black transition cursor-pointer">
+        <i class="ti ti-chart-bar text-lg"></i>
+        Resumen
+      </a>
+      <a routerLink="catalogo" routerLinkActive="bg-gray-100 text-black font-semibold"
+         class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-black transition cursor-pointer">
+        <i class="ti ti-books text-lg"></i>
+        Catálogo
+      </a>
+      <a routerLink="calculadora" routerLinkActive="bg-gray-100 text-black font-semibold"
+         class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-black transition cursor-pointer">
+        <i class="ti ti-calculator text-lg"></i>
+        Calculadora
+      </a>
+      <a routerLink="stock" routerLinkActive="bg-gray-100 text-black font-semibold"
+         class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-black transition cursor-pointer">
+        <i class="ti ti-database text-lg"></i>
+        Inventario
+      </a>
+      <a routerLink="maquinas" routerLinkActive="bg-gray-100 text-black font-semibold"
+         class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-black transition cursor-pointer">
+        <i class="ti ti-printer text-lg"></i>
+        Máquinas
+      </a>
+      <a routerLink="finanzas" routerLinkActive="bg-gray-100 text-black font-semibold"
+         class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-black transition cursor-pointer">
+        <i class="ti ti-report-money text-lg"></i>
+        Finanzas
+      </a>
+      <a routerLink="clientes" routerLinkActive="bg-gray-100 text-black font-semibold"
+         class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-black transition cursor-pointer">
+        <i class="ti ti-users text-lg"></i>
+        Clientes
+      </a>
+    </nav>
+    
+    <div class="border-t border-gray-100 pt-4">
+      <button (click)="logout()" class="flex w-full items-center gap-3 px-4 py-2.5 rounded-xl text-red-500 hover:bg-red-50 transition cursor-pointer border-none bg-transparent text-left font-medium">
+        <i class="ti ti-logout text-lg"></i>
+        Cerrar sesión
+      </button>
+    </div>
+  </aside>
+
+  <!-- Top bar (Mobile: visible, Desktop: hidden) -->
+  <header class="md:hidden flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
+    <div class="flex items-center gap-2">
+      <span class="text-2xl">📦</span>
+      <span class="font-bold tracking-tight">Producción 3D</span>
+    </div>
+    <button (click)="logout()" class="text-gray-500 hover:text-red-500 p-1 cursor-pointer border-none bg-transparent">
+      <i class="ti ti-logout text-xl"></i>
+    </button>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-8">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Bottom Navigation Bar (Mobile: visible, Desktop: hidden) -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-2.5 z-50 shadow-lg">
+    <a routerLink="pedidos" routerLinkActive="text-black font-bold" [routerLinkActiveOptions]="{exact: true}"
+       class="flex flex-col items-center justify-center py-1 text-gray-400 hover:text-black transition flex-1 cursor-pointer no-underline">
+      <i class="ti ti-package text-2xl"></i>
+      <span class="text-[10px] mt-0.5 font-medium">Pedidos</span>
+    </a>
+    <a routerLink="lotes" routerLinkActive="text-black font-bold"
+       class="flex flex-col items-center justify-center py-1 text-gray-400 hover:text-black transition flex-1 cursor-pointer no-underline">
+      <i class="ti ti-layers-intersect text-2xl"></i>
+      <span class="text-[10px] mt-0.5 font-medium">Lotes</span>
+    </a>
+    <a routerLink="resumen" routerLinkActive="text-black font-bold"
+       class="flex flex-col items-center justify-center py-1 text-gray-400 hover:text-black transition flex-1 cursor-pointer no-underline">
+      <i class="ti ti-chart-bar text-2xl"></i>
+      <span class="text-[10px] mt-0.5 font-medium">Resumen</span>
+    </a>
+    <a routerLink="catalogo" routerLinkActive="text-black font-bold"
+       class="flex flex-col items-center justify-center py-1 text-gray-400 hover:text-black transition flex-1 cursor-pointer no-underline">
+      <i class="ti ti-books text-2xl"></i>
+      <span class="text-[10px] mt-0.5 font-medium">Catálogo</span>
+    </a>
+    <a routerLink="calculadora" routerLinkActive="text-black font-bold"
+       class="flex flex-col items-center justify-center py-1 text-gray-400 hover:text-black transition flex-1 cursor-pointer no-underline">
+      <i class="ti ti-calculator text-2xl"></i>
+      <span class="text-[10px] mt-0.5 font-medium">Calculadora</span>
+    </a>
+    <a routerLink="stock" routerLinkActive="text-black font-bold"
+       class="flex flex-col items-center justify-center py-1 text-gray-400 hover:text-black transition flex-1 cursor-pointer no-underline">
+      <i class="ti ti-database text-2xl"></i>
+      <span class="text-[10px] mt-0.5 font-medium">Stock</span>
+    </a>
+    <a routerLink="maquinas" routerLinkActive="text-black font-bold"
+       class="flex flex-col items-center justify-center py-1 text-gray-400 hover:text-black transition flex-1 cursor-pointer no-underline">
+      <i class="ti ti-printer text-2xl"></i>
+      <span class="text-[10px] mt-0.5 font-medium">Máquinas</span>
+    </a>
+    <a routerLink="finanzas" routerLinkActive="text-black font-bold"
+       class="flex flex-col items-center justify-center py-1 text-gray-400 hover:text-black transition flex-1 cursor-pointer no-underline">
+      <i class="ti ti-report-money text-2xl"></i>
+      <span class="text-[10px] mt-0.5 font-medium">Finanzas</span>
+    </a>
+    <a routerLink="clientes" routerLinkActive="text-black font-bold"
+       class="flex flex-col items-center justify-center py-1 text-gray-400 hover:text-black transition flex-1 cursor-pointer no-underline">
+      <i class="ti ti-users text-2xl"></i>
+      <span class="text-[10px] mt-0.5 font-medium">Clientes</span>
+    </a>
+  </nav>
+
+</div>

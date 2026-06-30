@@ -1,0 +1,274 @@
+<div class="flex flex-col gap-6">
+
+  <!-- Top Header Controls -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div class="flex items-center gap-2.5">
+      <i class="ti ti-database text-2xl text-black"></i>
+      <h2 class="text-xl font-bold tracking-tight text-black">Gestión de Stock de Materiales</h2>
+    </div>
+    
+    <button 
+      (click)="openCreateModal()"
+      class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-black hover:bg-gray-900 text-white rounded-xl font-bold text-xs shadow-sm transition active:scale-[0.98] cursor-pointer border-none">
+      <i class="ti ti-plus text-sm"></i>
+      Nueva Bobina
+    </button>
+  </div>
+
+  <!-- Messages / Alerts -->
+  @if (errorMessage()) {
+    <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-xs text-red-600 font-semibold flex items-center gap-2">
+      <i class="ti ti-alert-circle text-base"></i>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+  @if (successMessage()) {
+    <div class="p-4 rounded-xl bg-green-50 border border-green-200 text-xs text-green-600 font-semibold flex items-center gap-2">
+      <i class="ti ti-circle-check text-base"></i>
+      <span>{{ successMessage() }}</span>
+    </div>
+  }
+
+  <!-- Loading State -->
+  @if (isLoading() && materials().length === 0) {
+    <div class="flex justify-center items-center py-20">
+      <span class="animate-spin inline-block w-8 h-8 border-4 border-black border-t-transparent rounded-full"></span>
+    </div>
+  }
+
+  <!-- Spools Empty State -->
+  @if (materials().length === 0 && !isLoading()) {
+    <div class="bg-white border border-gray-200 rounded-2xl p-10 text-center shadow-sm">
+      <i class="ti ti-cylinder text-4xl text-gray-300 block mb-3"></i>
+      <p class="text-sm font-semibold text-gray-500">No hay bobinas registradas en el inventario.</p>
+      <p class="text-xs text-gray-400 mt-1">Registra filamentos o resinas para comenzar a controlar tu consumo de material.</p>
+      <button 
+        (click)="openCreateModal()"
+        class="mt-4 inline-flex items-center justify-center gap-1 px-4 py-2 border border-black hover:bg-black hover:text-white rounded-xl text-xs font-bold transition bg-transparent cursor-pointer">
+        Registrar Bobina
+      </button>
+    </div>
+  } @else {
+    <!-- Material Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (material of materials(); track material.id) {
+        @let pct = (material.currentWeight / material.totalWeight) * 100;
+        @let isLow = pct < 20;
+
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+          <div>
+            <!-- Header: Spool Info & Spool Circle -->
+            <div class="flex items-start justify-between gap-3 mb-4">
+              <div class="flex items-center gap-3">
+                <!-- Color Hex Circle -->
+                <div 
+                  class="w-5 h-5 rounded-full border border-gray-300 shadow-inner shrink-0" 
+                  [style.backgroundColor]="material.colorHex"
+                  [title]="'Color: ' + material.colorHex">
+                </div>
+                <div>
+                  <h4 class="font-bold text-sm text-gray-800 leading-tight">{{ material.name }}</h4>
+                  <span class="inline-block text-[9px] font-bold uppercase tracking-wider text-gray-400 bg-gray-100 rounded px-1.5 py-0.5 mt-1">
+                    {{ material.type }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Spool Action Buttons -->
+              <div class="flex items-center gap-1">
+                <button 
+                  (click)="openEditModal(material)"
+                  class="p-1.5 text-gray-400 hover:text-black hover:bg-gray-50 rounded-lg transition cursor-pointer border-none bg-transparent"
+                  title="Editar">
+                  <i class="ti ti-pencil text-sm"></i>
+                </button>
+                <button 
+                  (click)="deleteMaterial(material.id)"
+                  class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition cursor-pointer border-none bg-transparent"
+                  title="Eliminar">
+                  <i class="ti ti-trash text-sm"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Grams and Percentage indicators -->
+            <div class="flex justify-between items-end text-xs mb-2">
+              <div>
+                <span class="text-gray-400">Restante:</span>
+                <span class="font-mono font-bold text-gray-800 ml-1">{{ material.currentWeight }}g</span>
+                <span class="text-gray-400 text-[10px]"> / {{ material.totalWeight }}g</span>
+              </div>
+              <span class="font-mono font-bold" [class.text-red-500]="isLow" [class.text-emerald-500]="!isLow">
+                {{ pct | number:'1.0-0' }}%
+              </span>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden mb-4 border border-gray-150">
+              <div 
+                class="h-full rounded-full transition-all duration-500"
+                [class.bg-red-500]="isLow"
+                [class.bg-emerald-500]="!isLow"
+                [style.width.%]="pct">
+              </div>
+            </div>
+
+            <!-- Low Stock Warnings -->
+            @if (isLow) {
+              <div class="mb-4 py-1.5 px-3 rounded-lg bg-red-50 border border-red-100 flex items-center gap-1.5 text-[10px] text-red-700 font-bold uppercase tracking-wide">
+                <i class="ti ti-alert-triangle text-xs"></i>
+                <span>¡Stock bajo! Queda menos del 20%</span>
+              </div>
+            }
+          </div>
+
+          <!-- Bottom: Quick Deduct Panel -->
+          <div class="border-t border-gray-100 pt-3.5 mt-2 flex flex-col gap-2">
+            <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Descontar filamento (Consumo)</span>
+            <div class="flex gap-2">
+              <div class="relative flex-1">
+                <input 
+                  #consumeInput 
+                  type="number" 
+                  placeholder="Ej. 120" 
+                  min="1"
+                  class="w-full pl-3 pr-7 py-2 border border-gray-200 rounded-xl text-xs focus:border-black focus:outline-none bg-gray-50/50 transition">
+                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-gray-400">g</span>
+              </div>
+              
+              <button 
+                type="button" 
+                (click)="onConsume(material.id, consumeInput)"
+                class="px-4 py-2 bg-gray-100 hover:bg-black hover:text-white text-gray-700 rounded-xl font-bold text-xs transition active:scale-[0.98] cursor-pointer border-none">
+                Restar (g)
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Spool Create/Edit Modal -->
+  @if (isModalOpen()) {
+    <div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl border border-gray-200 shadow-xl w-full max-w-md overflow-hidden animate-[fadeIn_0.15s_ease-out]">
+        
+        <!-- Modal Header -->
+        <div class="px-6 py-4 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+          <h3 class="text-sm font-bold uppercase tracking-wider text-gray-600 flex items-center gap-2">
+            <i class="ti" [class.ti-plus]="!isEditMode()" [class.ti-pencil]="isEditMode()"></i>
+            {{ isEditMode() ? 'Editar Bobina' : 'Registrar Bobina' }}
+          </h3>
+          <button 
+            (click)="closeModal()"
+            class="text-gray-400 hover:text-black p-1 rounded-lg cursor-pointer border-none bg-transparent">
+            <i class="ti ti-x text-lg"></i>
+          </button>
+        </div>
+
+        <!-- Modal Body Form -->
+        <form [formGroup]="materialForm" (ngSubmit)="onSubmit()" class="p-6 flex flex-col gap-4">
+          <!-- Name -->
+          <div>
+            <label for="m-name" class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Nombre del material</label>
+            <input 
+              type="text" 
+              id="m-name" 
+              formControlName="name"
+              placeholder="Ej. PLA Grilon3 Verde Fluo"
+              class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-black focus:outline-none bg-gray-50/50 transition">
+          </div>
+
+          <!-- Type -->
+          <div>
+            <label for="m-type" class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Tipo de filamento/material</label>
+            <select 
+              id="m-type" 
+              formControlName="type"
+              class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-black focus:outline-none bg-gray-50/50 transition">
+              <option value="PLA">PLA</option>
+              <option value="PETG">PETG</option>
+              <option value="ABS">ABS</option>
+              <option value="TPU">TPU</option>
+              <option value="Resina">Resina</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+
+          <!-- Weights Grid -->
+          <div class="grid grid-cols-2 gap-4">
+            <!-- Total Weight -->
+            <div>
+              <label for="m-total" class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Peso total (g)</label>
+              <div class="relative">
+                <input 
+                  type="number" 
+                  id="m-total" 
+                  formControlName="totalWeight"
+                  placeholder="Ej. 1000"
+                  class="w-full pl-3 pr-7 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-black focus:outline-none bg-gray-50/50 transition">
+                <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-semibold">g</span>
+              </div>
+            </div>
+
+            <!-- Current Weight -->
+            <div>
+              <label for="m-current" class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Peso actual (g)</label>
+              <div class="relative">
+                <input 
+                  type="number" 
+                  id="m-current" 
+                  formControlName="currentWeight"
+                  placeholder="Ej. 1000"
+                  class="w-full pl-3 pr-7 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-black focus:outline-none bg-gray-50/50 transition">
+                <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-semibold">g</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Color Hex Selection -->
+          <div>
+            <label for="m-color" class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Color del filamento</label>
+            <div class="flex gap-2">
+              <input 
+                type="color" 
+                formControlName="colorHex"
+                class="w-12 h-10 border border-gray-200 rounded-xl cursor-pointer p-0 shrink-0">
+              <input 
+                type="text" 
+                id="m-color" 
+                formControlName="colorHex"
+                placeholder="Ej. #2ECC71"
+                class="flex-1 px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-black focus:outline-none bg-gray-50/50 transition">
+            </div>
+            <p class="text-[9px] text-gray-400 mt-1">Usa la paleta para seleccionar o escribe el código hexadecimal.</p>
+          </div>
+
+          <!-- Modal Action Buttons -->
+          <div class="flex gap-3 mt-4 border-t border-gray-100 pt-4">
+            <button 
+              type="button" 
+              (click)="closeModal()"
+              class="flex-1 inline-flex items-center justify-center px-4 py-3 border border-gray-200 hover:bg-gray-50 rounded-xl font-bold text-xs shadow-sm transition active:scale-[0.98] cursor-pointer bg-white">
+              Cancelar
+            </button>
+            <button 
+              type="submit" 
+              [disabled]="isLoading() || materialForm.invalid"
+              class="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-3 bg-black hover:bg-gray-900 disabled:bg-gray-400 text-white rounded-xl font-bold text-xs shadow-sm transition active:scale-[0.98] cursor-pointer border-none">
+              @if (isLoading()) {
+                <span class="animate-spin inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full"></span>
+              } @else {
+                <i class="ti ti-device-floppy"></i>
+              }
+              <span>{{ isEditMode() ? 'Guardar Cambios' : 'Registrar Bobina' }}</span>
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  }
+
+</div>
