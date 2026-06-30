@@ -5,12 +5,17 @@ dotenv.config();
 
 const dbUrl = process.env.DATABASE_URL || 'postgres://postgres:1234@localhost:5432/produccion3d';
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 const sequelize = new Sequelize(dbUrl, {
   dialect: 'postgres',
   logging: process.env.NODE_ENV === 'development' ? console.log : false,
-  dialectOptions: {
-    // Add SSL or other PostgreSQL specific settings here if needed in production
-  },
+  dialectOptions: isProduction ? {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false
+    }
+  } : {},
   pool: {
     max: 5,
     min: 0,
