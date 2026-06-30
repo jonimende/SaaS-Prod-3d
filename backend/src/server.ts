@@ -19,18 +19,15 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Apply middlewares
-const allowedOrigins = [
-  'http://localhost:4200',
-  ...(process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : [])
-].map(o => o.trim()).filter(Boolean);
+const allowedOrigins = ['http://localhost:4200', 'https://saa-s-prod-3d.vercel.app'];
 
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
-      return callback(null, true);
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
     }
-    return callback(new Error(`Origin ${origin} not allowed by CORS`));
   },
   credentials: true
 }));
