@@ -54,6 +54,10 @@ async function startServer() {
   try {
     await sequelize.authenticate();
     console.log('PostgreSQL database connected successfully.');
+
+    console.log('Syncing database schema (alter: true)...');
+    await sequelize.sync({ alter: true });
+    console.log('Database schema synchronized successfully.');
     
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
