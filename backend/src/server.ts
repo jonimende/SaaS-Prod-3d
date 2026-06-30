@@ -19,7 +19,21 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Apply middlewares
-app.use(cors());
+const allowedOrigins = [
+  'http://localhost:4200',
+  ...(process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : [])
+].map(o => o.trim()).filter(Boolean);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+      return callback(null, true);
+    }
+    return callback(new Error(`Origin ${origin} not allowed by CORS`));
+  },
+  credentials: true
+}));
 app.use(express.json());
 
 // Mount API endpoints
